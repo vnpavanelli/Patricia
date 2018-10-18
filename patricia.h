@@ -1,7 +1,9 @@
+#pragma once
 #include <memory>
 #include <string>
 
 #define NUMARY 27
+
 
 class PayLoad {
     public:
@@ -11,24 +13,14 @@ class PayLoad {
         PayLoad(void) : chave(""), conteudo("") {};
 };
 
-
-class Patricia {
-    private:
     class Node {
         public:
             virtual bool isInterno(void) { return false; };
             virtual bool isFolha(void) { return false; };
             virtual void Lista(void) { return; };
-            Node() {};
+            unsigned int id;
+            Node();
     };
-
-struct RetornoBusca {
-    Patricia::Node *p = nullptr;
-    Patricia::Node *q = nullptr;
-    bool achou=false;
-    std::shared_ptr<PayLoad> payload;
-};
-
 
     class NodeInterno : public Node {
         public:
@@ -36,7 +28,7 @@ struct RetornoBusca {
         bool isFolha(void) { return false; };
         unsigned int nivel;
         std::shared_ptr<Node> ponteiros[NUMARY];
-        NodeInterno() {};
+        NodeInterno() : Node() {};
     };
 
     class NodeFolha : public Node {
@@ -46,10 +38,24 @@ struct RetornoBusca {
         bool isInterno(void) { return false; };
         bool isFolha(void) { return true; };
         void Lista(void);
-        NodeFolha(const PayLoad& p) {
+        NodeFolha(const PayLoad& p) : Node() {
             payload = std::make_shared<PayLoad>(p);
         };
     };
+
+struct RetornoBusca {
+    std::shared_ptr<Node> *p = nullptr, *q = nullptr;
+    bool achou=false;
+    std::shared_ptr<PayLoad> payload;
+};
+
+
+
+
+class Patricia {
+    public:
+        static unsigned int contador;
+    private:
 
     std::shared_ptr<Node> raiz;
 
@@ -57,7 +63,8 @@ struct RetornoBusca {
         void Insere(const PayLoad &);
         void Insere(const std::string&, const std::string&);
         void Lista(void);
+        void ListaAux(std::shared_ptr<Node>, unsigned int );
         std::shared_ptr<RetornoBusca> Busca(const std::string&);
-        void BuscaAuxiliar(const std::string&, std::shared_ptr<Node>, std::shared_ptr<RetornoBusca>); 
+        void BuscaAuxiliar(const std::string&, std::shared_ptr<Node>*, std::shared_ptr<RetornoBusca>); 
         unsigned int AchaNivel (const std::string&, const std::string&);
 };
