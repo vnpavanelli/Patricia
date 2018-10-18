@@ -22,5 +22,9 @@ int main (int ac, char **av) {
     p.Lista();
     std::cout << std::endl << std::endl << " Buscando:" << std::endl;
     auto r = p.Busca("teste");
+
+
+    std::cout << std::endl << std::endl << std::endl;
+    std::cout << p.GeraDot() << std::endl;
     return 0;
 }

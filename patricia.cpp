@@ -1,5 +1,6 @@
 #include "patricia.h"
 #include <iostream>
+#include <sstream>
 #include <memory>
 
 unsigned int Patricia::contador = 0;
@@ -34,6 +35,7 @@ void Patricia::Insere(const PayLoad &pay) {
         const char p_node = node->payload->chave.c_str()[nivel];
         std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "'" << std::endl;
         node_interno->nivel = nivel;
+        node_interno->prefixo = std::string(pay.chave, 0, nivel);
         node_interno->ponteiros[p_novo - 'a'] = node_novo;
         node_interno->ponteiros[p_node - 'a'] = node;
         raiz = node_interno;
@@ -60,6 +62,7 @@ void Patricia::Insere(const PayLoad &pay) {
         const char p_ptr = node->payload->chave.c_str()[node_ponteiros->nivel];
         std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "'" << std::endl;
         node_interno->nivel = nivel;
+        node_interno->prefixo = std::string(pay.chave, 0, nivel);
         node_interno->ponteiros[p_novo - 'a'] = node_novo;
         node_interno->ponteiros[p_node - 'a'] = *(aux->q);
         node_ponteiros->ponteiros[p_ptr - 'a'] = node_interno;
@@ -67,6 +70,61 @@ void Patricia::Insere(const PayLoad &pay) {
 
     return;
 
+}
+
+std::string Patricia::GeraDot(void) {
+    std::stringstream definicoes, ligacoes;
+    GeraDotAux(definicoes, ligacoes, raiz, 0, ' ');
+
+    std::stringstream tmp;
+    tmp << "digraph Teste {" << std::endl << " node [shape=record];" << std::endl;
+    tmp << definicoes.str();
+    tmp << ligacoes.str();
+    tmp << "}" << std::endl;
+    return tmp.str();
+}
+
+void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& ligacoes, std::shared_ptr<Node> no, unsigned int pai, char pai_char) {
+    if (!no) return;
+    if (no->isFolha()) {
+        NodeFolha* tmp = (NodeFolha*) no.get();
+        definicoes << "no" << tmp->id << " [label=\"<f0> " << tmp->payload->chave << "\"];" << std::endl;
+        /*
+        if (pai_char >= 'a') {
+            ligacoes << "no" << pai << ":f" << pai_char << " -> no" << tmp->id << ":f0;" << std::endl;
+        } else {
+            ligacoes << "no" << pai << ":f0 -> no" << tmp->id << ":f0;" << std::endl;
+        }
+        */
+    }
+    if (no->isInterno()) {
+        NodeInterno* tmp = (NodeInterno*) no.get();
+        /*
+        if (pai_char >= 'a') {
+            ligacoes << "no" << pai << ":f" << pai_char << " -> no" << tmp->id << ":f0;" << std::endl;
+        } else {
+            ligacoes << "no" << pai << ":f0 -> no" << tmp->id << ":f0;" << std::endl;
+        }
+        */
+        definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->prefixo <<  "| {";
+        bool virgula = false;
+        for (char i='a'; i <= 'z'; i++) {
+            if (tmp->ponteiros[i-'a']) {
+                if (virgula) definicoes << " | ";
+                 else virgula = true;
+                definicoes << "<f" << i << "> " << i;
+                ligacoes << "no" << tmp->id << ":f" << i << " -> no" << tmp->ponteiros[i-'a']->id << ":f0;" << std::endl;
+            }
+        }
+        definicoes << "}}\"];" << std::endl;
+
+        for (char i='a'; i <= 'z'; i++) {
+            if (tmp->ponteiros[i-'a']) {
+                GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i-'a'], tmp->id, i);
+            }
+        }
+ 
+    }
 }
 
 void Patricia::Lista(void) {
