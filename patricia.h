@@ -22,10 +22,11 @@ class Patricia {
             Node() {};
     };
 
-struct AuxInsere {
+struct RetornoBusca {
     Patricia::Node *p = nullptr;
     Patricia::Node *q = nullptr;
     bool achou=false;
+    std::shared_ptr<PayLoad> payload;
 };
 
 
@@ -40,8 +41,8 @@ struct AuxInsere {
 
     class NodeFolha : public Node {
         private:
-            std::shared_ptr<PayLoad> payload;
         public:
+            std::shared_ptr<PayLoad> payload;
         bool isInterno(void) { return false; };
         bool isFolha(void) { return true; };
         void Lista(void);
@@ -56,5 +57,7 @@ struct AuxInsere {
         void Insere(const PayLoad &);
         void Insere(const std::string&, const std::string&);
         void Lista(void);
-        std::shared_ptr<PayLoad> Busca(const std::string&, AuxInsere *i=nullptr);
+        std::shared_ptr<RetornoBusca> Busca(const std::string&);
+        void BuscaAuxiliar(const std::string&, std::shared_ptr<Node>, std::shared_ptr<RetornoBusca>); 
+        unsigned int AchaNivel (const std::string&, const std::string&);
 };
