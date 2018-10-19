@@ -19,6 +19,7 @@ class PayLoad {
             virtual bool isInterno(void) { return false; };
             virtual bool isFolha(void) { return false; };
             virtual void Lista(void) { return; };
+            virtual std::string Chave(void) { return ""; };
             unsigned int id;
             Node();
     };
@@ -27,6 +28,7 @@ class PayLoad {
         public:
         bool isInterno(void) { return true; };
         bool isFolha(void) { return false; };
+        std::string Chave(void) { return prefixo; };
         unsigned int nivel;
         std::string prefixo;
         std::shared_ptr<Node> ponteiros[NUMARY];
@@ -40,6 +42,10 @@ class PayLoad {
         bool isInterno(void) { return false; };
         bool isFolha(void) { return true; };
         void Lista(void);
+        std::string Chave(void) { 
+            if (payload) return payload->chave; 
+            return "";
+        };
         NodeFolha(const PayLoad& p) : Node() {
             payload = std::make_shared<PayLoad>(p);
         };
@@ -69,6 +75,7 @@ class Patricia {
         std::shared_ptr<RetornoBusca> Busca(const std::string&);
         void BuscaAuxiliar(const std::string&, std::shared_ptr<Node>*, std::shared_ptr<RetornoBusca>); 
         unsigned int AchaNivel (const std::string&, const std::string&);
+        bool ComecaCom (const std::string&, const std::string&);
         std::string GeraDot(void);
         void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>, unsigned int, char);
 };

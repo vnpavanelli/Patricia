@@ -12,35 +12,84 @@ void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
 
 void Patricia::Insere(const PayLoad &pay) {
     std::cout << "Inserindo PayLoad: chave=" << pay.chave << std::endl;
+
+    /* Se a raiz é nula podemos inserir uma folha nela e termina */
     if (raiz.get() == nullptr) {
         std::cout << " -> Raiz é nula!" << std::endl;
         auto node = std::make_shared<NodeFolha>(pay);
         std::cout << " -> Node: folha=" << node->isFolha() << " interno=" << node->isInterno() << std::endl;
         raiz = std::static_pointer_cast<Node>(node);
+        return;
     } else {
         std::cout << " -> Raiz existe!" << std::endl;
     }
+
+    /* Caso contrario precisamos examinar a raiz */
     std::cout << " -> Raiz: folha=" << raiz->isFolha() << " interno=" << raiz->isInterno() << std::endl;
+
+    /* Se a raiz é uma simples folha, inserimos um no interno dividindo entra a folha e no que vamos criar */
     if (raiz->isFolha()) {
+        /* A raiz contem o proprio nó que queremos inserir? */
         auto node = std::static_pointer_cast<NodeFolha>(raiz);
         if (node->payload->chave == pay.chave) {
             std::cout << " -> Chave do payload já esta na raiz, encerrando" << std::endl;
             return;
         }
+
+
         std::cout << " -> Raiz é folha, criando nó interno" << std::endl;
+        /* Cria os nos interno e o no novo a ser inserido */
         auto node_novo = std::make_shared<NodeFolha>(pay);
         auto node_interno = std::make_shared<NodeInterno>();
-        auto nivel = AchaNivel(pay.chave, node->payload->chave);
+
+        /* Acha o nivel que as strings divergem e o caractere de cada uma */
+        auto nivel = AchaNivel(pay.chave, node->Chave());
         const char p_novo = pay.chave.c_str()[nivel];
-        const char p_node = node->payload->chave.c_str()[nivel];
+        const char p_node = node->Chave().c_str()[nivel];
+
+        /* Preparamos o no interno, com o nivel e as duas folhas */
         std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "'" << std::endl;
         node_interno->nivel = nivel;
         node_interno->prefixo = std::string(pay.chave, 0, nivel);
         node_interno->ponteiros[p_novo - 'a'] = node_novo;
         node_interno->ponteiros[p_node - 'a'] = node;
+
+        /* Apontamos a raiz para o no interno */
         raiz = node_interno;
         return;
     }
+
+    /* Se a raiz é um no interno precisamos checar se ele contem o prefixo da chave */
+    if (raiz->isInterno()) {
+        auto node = std::static_pointer_cast<NodeFolha>(raiz);
+
+        /* Se ele não contem, vamos inserir um novo nó interno para divergir */
+        if (!ComecaCom(pay.chave, node->Chave())) {
+            std::cout << " -> Raiz não contem prefixo da arvore" << std::endl;
+
+            /* Cria os nos interno e o no novo a ser inserido */
+            auto node_novo = std::make_shared<NodeFolha>(pay);
+            auto node_interno = std::make_shared<NodeInterno>();
+
+            /* Acha o nivel que as strings divergem e o caractere de cada uma */
+            auto nivel = AchaNivel(pay.chave, node->Chave());
+            const char p_novo = pay.chave.c_str()[nivel];
+            const char p_node = node->Chave().c_str()[nivel];
+
+            /* Preparamos o no interno, com o nivel e as duas folhas */
+            std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "'" << std::endl;
+            node_interno->nivel = nivel;
+            node_interno->prefixo = std::string(pay.chave, 0, nivel);
+            node_interno->ponteiros[p_novo - 'a'] = node_novo;
+            node_interno->ponteiros[p_node - 'a'] = node;
+
+            /* Apontamos a raiz para o no interno */
+            raiz = node_interno;
+            return;
+        }
+    }
+
+
     auto aux = Busca(pay.chave);
     if (aux->achou) {
         std::cout << " -> Chave já existe na árvore!" << std::endl;
@@ -50,6 +99,10 @@ void Patricia::Insere(const PayLoad &pay) {
     if (aux->p != nullptr && aux->p->get() != nullptr) std::cout << "    -> nó p(" << aux->p->get()->id << ") -> folha=" << aux->p->get()->isFolha() << " interno=" << aux->p->get()->isInterno() << std::endl;
     if (aux->q && aux->q->get()) std::cout << "    -> nó q(" << aux->q->get()->id << ") -> folha=" << aux->q->get()->isFolha() << " interno=" << aux->q->get()->isInterno() << std::endl;
 
+    if (aux->q && !aux->p) {
+        aux->p = &raiz;
+    }
+
     if (aux->q && !aux->q->get()) {
         // Existe ponteiro em Q mas ele eh nulo
         auto node_novo = std::make_shared<NodeFolha>(pay);
@@ -58,19 +111,18 @@ void Patricia::Insere(const PayLoad &pay) {
     }
 
 
-
         auto node_novo = std::make_shared<NodeFolha>(pay);
         auto node_interno = std::make_shared<NodeInterno>();
         auto node = (NodeFolha*) aux->q->get();
         auto node_ponteiros = (NodeInterno*) aux->p->get();
-        auto nivel = AchaNivel(pay.chave, node->payload->chave);
+        auto nivel = AchaNivel(pay.chave, node->Chave());
         const char p_novo = pay.chave.c_str()[nivel];
-        const char p_node = node->payload->chave.c_str()[nivel];
+        const char p_node = node->Chave().c_str()[nivel];
 
-        const char p_ptr = node->payload->chave.c_str()[node_ponteiros->nivel];
-        std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "'" << std::endl;
+        const char p_ptr = node->Chave().c_str()[node_ponteiros->nivel];
         node_interno->nivel = nivel;
         node_interno->prefixo = std::string(pay.chave, 0, nivel);
+        std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "' prefixo='" << node_interno->prefixo << "'" << std::endl;
         node_interno->ponteiros[p_novo - 'a'] = node_novo;
         node_interno->ponteiros[p_node - 'a'] = *(aux->q);
         node_ponteiros->ponteiros[p_ptr - 'a'] = node_interno;
@@ -162,11 +214,13 @@ void Patricia::ListaAux(std::shared_ptr<Node> no, unsigned int identacao) {
 }
 
 std::shared_ptr<RetornoBusca> Patricia::Busca(const std::string& chave) {
+    std::cout << "Listando arvore antes da busca: " << std::endl;
+    Lista();
     std::cout << "Busca: chave=" << chave << std::endl;
     auto r = std::make_shared<RetornoBusca>();
-    r->q = &this->raiz;
+    //r->q = &this->raiz;
     r->achou = false;
-    if (r->q->get() == nullptr) {
+    if (!raiz) {
         std::cout << "Busca retornando, raiz vazia" << std::endl;
         return r;
     }
@@ -194,8 +248,13 @@ void Patricia::BuscaAuxiliar(const std::string& chave, std::shared_ptr<Node>* no
         return;
     }
     if (no->get()->isInterno()) {
-        std::cout << " Nó é nó interno" << std::endl;
+        std::cout << " Nó (" << no->get()->id << ") é nó interno" << std::endl;
         auto tmp = std::static_pointer_cast<NodeInterno>(*no);
+        if (!ComecaCom(chave, tmp->prefixo)) {
+            std::cout << "   -> Prefixo=" << tmp->prefixo << " chave=" << chave << std::endl;
+            // A chave não pode estar dentro do no interno
+            return;
+        }
         char letra = chave.c_str()[tmp->nivel];
         std::cout << " -> nivel=" << tmp->nivel << " letra=" << letra << " ponteiro=" << letra-'a' << std::endl;
         auto no2 = &tmp->ponteiros[letra-'a'];
@@ -220,6 +279,15 @@ unsigned int Patricia::AchaNivel (const std::string& k1, const std::string& k2) 
     unsigned int nivel = p1-p0;
     std::cout << " AchaNivel: k1=" << k1 << " k2=" << k2 << " nivel=" << nivel << std::endl;
     return (nivel);
+}
+
+bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
+    const char *p1 = s1.c_str(), *p2 = pre.c_str();
+    while (*p1 != '\0' && *p2 != '\0' && *p1 == *p2) {
+        p1++; p2++;
+    }
+    if (*p2 == '\0' && *p1 != '\0') return true;
+    return false;
 }
 
 Node::Node() {
