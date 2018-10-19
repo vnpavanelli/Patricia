@@ -88,24 +88,10 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
     if (!no) return;
     if (no->isFolha()) {
         NodeFolha* tmp = (NodeFolha*) no.get();
-        definicoes << "no" << tmp->id << " [label=\"<f0> " << tmp->payload->chave << "\"];" << std::endl;
-        /*
-        if (pai_char >= 'a') {
-            ligacoes << "no" << pai << ":f" << pai_char << " -> no" << tmp->id << ":f0;" << std::endl;
-        } else {
-            ligacoes << "no" << pai << ":f0 -> no" << tmp->id << ":f0;" << std::endl;
-        }
-        */
+        definicoes << "no" << tmp->id << " [shape=ellipse, label=\"" << tmp->payload->chave << "\"];" << std::endl;
     }
     if (no->isInterno()) {
         NodeInterno* tmp = (NodeInterno*) no.get();
-        /*
-        if (pai_char >= 'a') {
-            ligacoes << "no" << pai << ":f" << pai_char << " -> no" << tmp->id << ":f0;" << std::endl;
-        } else {
-            ligacoes << "no" << pai << ":f0 -> no" << tmp->id << ":f0;" << std::endl;
-        }
-        */
         definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->prefixo <<  "| {";
         bool virgula = false;
         for (char i='a'; i <= 'z'; i++) {
@@ -113,7 +99,7 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
                 if (virgula) definicoes << " | ";
                  else virgula = true;
                 definicoes << "<f" << i << "> " << i;
-                ligacoes << "no" << tmp->id << ":f" << i << " -> no" << tmp->ponteiros[i-'a']->id << ":f0;" << std::endl;
+                ligacoes << "no" << tmp->id << ":f" << i << " -> no" << tmp->ponteiros[i-'a']->id << (tmp->ponteiros[i-'a']->isFolha() ? "" : ":f0") << ";" << std::endl;
             }
         }
         definicoes << "}}\"];" << std::endl;

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "patricia.h"
+#include <fstream>
 
 int main (int ac, char **av) {
     Patricia p;
@@ -23,8 +24,8 @@ int main (int ac, char **av) {
     std::cout << std::endl << std::endl << " Buscando:" << std::endl;
     auto r = p.Busca("teste");
 
-
-    std::cout << std::endl << std::endl << std::endl;
-    std::cout << p.GeraDot() << std::endl;
+    std::ofstream dot("teste.dot", std::ofstream::out);
+    dot << p.GeraDot();
+    dot.close();
     return 0;
 }
