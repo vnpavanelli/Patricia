@@ -50,6 +50,14 @@ void Patricia::Insere(const PayLoad &pay) {
     if (aux->p != nullptr && aux->p->get() != nullptr) std::cout << "    -> nó p(" << aux->p->get()->id << ") -> folha=" << aux->p->get()->isFolha() << " interno=" << aux->p->get()->isInterno() << std::endl;
     if (aux->q && aux->q->get()) std::cout << "    -> nó q(" << aux->q->get()->id << ") -> folha=" << aux->q->get()->isFolha() << " interno=" << aux->q->get()->isInterno() << std::endl;
 
+    if (aux->q && !aux->q->get()) {
+        // Existe ponteiro em Q mas ele eh nulo
+        auto node_novo = std::make_shared<NodeFolha>(pay);
+        (*aux->q) = node_novo;
+        return;
+    }
+
+
 
         auto node_novo = std::make_shared<NodeFolha>(pay);
         auto node_interno = std::make_shared<NodeInterno>();
@@ -66,8 +74,6 @@ void Patricia::Insere(const PayLoad &pay) {
         node_interno->ponteiros[p_novo - 'a'] = node_novo;
         node_interno->ponteiros[p_node - 'a'] = *(aux->q);
         node_ponteiros->ponteiros[p_ptr - 'a'] = node_interno;
-
-
     return;
 
 }
@@ -171,6 +177,11 @@ std::shared_ptr<RetornoBusca> Patricia::Busca(const std::string& chave) {
 void Patricia::BuscaAuxiliar(const std::string& chave, std::shared_ptr<Node>* no, std::shared_ptr<RetornoBusca> r) {
      r->p = r->q;
      r->q = no;
+     if (!(*no)) {
+//         r->q = nullptr;
+         std::cout << " Nó nulo!" << std::endl;
+         return;
+     }
      if (no->get()->isFolha()) {
         std::cout << " Nó é folha" << std::endl;
         auto tmp = std::static_pointer_cast<NodeFolha>(*no);
