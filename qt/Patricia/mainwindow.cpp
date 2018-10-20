@@ -37,6 +37,7 @@ void MainWindow::on_b_mostrar_clicked()
         auto dot = p.GeraDot();
         QTextStream stream(&tmpfile);
         stream << QString(dot.c_str());
+        std::cout << "DOT:" << std::endl << dot << std::endl;
     }
     std::cout << "Dot gerado em: " << tmpfile.fileName().toStdString() << std::endl;
     QStringList args;

@@ -9,6 +9,13 @@ void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
     return Patricia::Insere(PayLoad(chave, conteudo));
 }
 
+char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
+    const char *p = in.c_str();
+    char r = *(p+nivel);
+    if (r == '\0') return '{';
+    return r;
+}
+
 
 void Patricia::Insere(const PayLoad &pay) {
     std::cout << "Inserindo PayLoad: chave=" << pay.chave << std::endl;
@@ -44,8 +51,8 @@ void Patricia::Insere(const PayLoad &pay) {
 
         /* Acha o nivel que as strings divergem e o caractere de cada uma */
         auto nivel = AchaNivel(pay.chave, node->Chave());
-        const char p_novo = pay.chave.c_str()[nivel];
-        const char p_node = node->Chave().c_str()[nivel];
+        const char p_novo = AchaChar(pay.chave, nivel);
+        const char p_node = AchaChar(node->Chave(), nivel);
 
         /* Preparamos o no interno, com o nivel e as duas folhas */
         std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "'" << std::endl;
@@ -73,8 +80,8 @@ void Patricia::Insere(const PayLoad &pay) {
 
             /* Acha o nivel que as strings divergem e o caractere de cada uma */
             auto nivel = AchaNivel(pay.chave, node->Chave());
-            const char p_novo = pay.chave.c_str()[nivel];
-            const char p_node = node->Chave().c_str()[nivel];
+            const char p_novo = AchaChar(pay.chave, nivel);
+            const char p_node = AchaChar(node->Chave(), nivel);
 
             /* Preparamos o no interno, com o nivel e as duas folhas */
             std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "'" << std::endl;
@@ -116,10 +123,10 @@ void Patricia::Insere(const PayLoad &pay) {
         auto node = (NodeFolha*) aux->q->get();
         auto node_ponteiros = (NodeInterno*) aux->p->get();
         auto nivel = AchaNivel(pay.chave, node->Chave());
-        const char p_novo = pay.chave.c_str()[nivel];
-        const char p_node = node->Chave().c_str()[nivel];
+        const char p_novo = AchaChar(pay.chave, nivel);
+        const char p_node = AchaChar(node->Chave(), nivel);
 
-        const char p_ptr = node->Chave().c_str()[node_ponteiros->nivel];
+        const char p_ptr = AchaChar(node->Chave(), node_ponteiros->nivel);
         node_interno->nivel = nivel;
         node_interno->prefixo = std::string(pay.chave, 0, nivel);
         std::cout << " -> Ponteiros: novo = '" << p_novo << "' node='" << p_node << "' prefixo='" << node_interno->prefixo << "'" << std::endl;
@@ -152,17 +159,17 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
         NodeInterno* tmp = (NodeInterno*) no.get();
         definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->prefixo <<  "| {";
         bool virgula = false;
-        for (char i='a'; i <= 'z'; i++) {
+        for (char i='a'; i <= '{'; i++) {
             if (tmp->ponteiros[i-'a']) {
                 if (virgula) definicoes << " | ";
                  else virgula = true;
-                definicoes << "<f" << i << "> " << i;
-                ligacoes << "no" << tmp->id << ":f" << i << " -> no" << tmp->ponteiros[i-'a']->id << (tmp->ponteiros[i-'a']->isFolha() ? "" : ":f0") << ";" << std::endl;
+                definicoes << "<f" << (i<='z'?i:'9') << "> " << (i<='z'?i:' ');
+                ligacoes << "no" << tmp->id << ":f" << (i<='z'?i:'9') << " -> no" << tmp->ponteiros[i-'a']->id << (tmp->ponteiros[i-'a']->isFolha() ? "" : ":f0") << ";" << std::endl;
             }
         }
         definicoes << "}}\"];" << std::endl;
 
-        for (char i='a'; i <= 'z'; i++) {
+        for (char i='a'; i <= '{'; i++) {
             if (tmp->ponteiros[i-'a']) {
                 GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i-'a'], tmp->id, i);
             }
@@ -196,7 +203,7 @@ void Patricia::ListaAux(std::shared_ptr<Node> no, unsigned int identacao) {
     no->print(identacao);
     if (no->isInterno()) {
         auto tmp = std::static_pointer_cast<NodeInterno>(no);
-        for (char i='a'; i <= 'z'; i++) {
+        for (char i='a'; i <= '{'; i++) {
             if (tmp->ponteiros[i-'a']) {
                 std::cout << itmp << "-> " << i << std::endl;
                 ListaAux(tmp->ponteiros[i-'a'], identacao+2);
@@ -228,7 +235,7 @@ bool Patricia::Remove (const std::string& chave) {
         if (tmp->NumFilhos() == 1 && r->o && r->o->get()->isInterno()) {
             auto O = std::static_pointer_cast<NodeInterno>(*(r->o));
             std::shared_ptr<Node> *tmp2 = nullptr;
-            for (char i='a'; i <= 'z'; i++) {
+            for (char i='a'; i <= '{'; i++) {
                 if (O->ponteiros[i]) {
                     tmp2 = &O->ponteiros[i];
                     break;
@@ -337,7 +344,7 @@ void NodeInterno::print(unsigned int identacao) {
 
 unsigned int NodeInterno::NumFilhos(void) {
     unsigned int r = 0;
-    for (char i = 'a'; i <= 'z'; i++) {
+    for (char i = 'a'; i <= '{'; i++) {
         if (ponteiros[i - 'a']) r++;
     }
     return r;
