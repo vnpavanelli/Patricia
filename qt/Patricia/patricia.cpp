@@ -167,7 +167,7 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
                 GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i-'a'], tmp->id, i);
             }
         }
- 
+
     }
 }
 
@@ -211,9 +211,9 @@ bool Patricia::Remove (const std::string& chave) {
     auto r = Busca(chave);
     if (!r->achou) return false;
     std::cout << "Remove chave encontrada: " << chave << std::endl;
-    std::cout << "O:" << std::endl; if (r->o) r->o->get()->print(2); 
-    std::cout << "P:" << std::endl; if (r->p) r->p->get()->print(2); 
-    std::cout << "Q:" << std::endl; if (r->q) r->q->get()->print(2); 
+    std::cout << "O:" << std::endl; if (r->o) r->o->get()->print(2);
+    std::cout << "P:" << std::endl; if (r->p) r->p->get()->print(2);
+    std::cout << "Q:" << std::endl; if (r->q) r->q->get()->print(2);
 
     /* Checar se temos um nó p, se tiver ele deve ser do tipo interno */
     if (r->p && r->p->get()->isInterno()) {
@@ -327,18 +327,18 @@ Node::Node() {
 
 void NodeFolha::print(unsigned int identacao) {
     std::string itmp(" ", identacao);
-    std::cout << itmp <<  "==> NodeFolha ID=" << id << " Chave=" << payload->chave << std::endl; 
+    std::cout << itmp <<  "==> NodeFolha ID=" << id << " Chave=" << payload->chave << std::endl;
 }
 
 void NodeInterno::print(unsigned int identacao) {
     std::string itmp(" ", identacao);
-    std::cout << itmp << "==> NodeInterno ID=" << id << " Prefixo=" << prefixo << std::endl; 
+    std::cout << itmp << "==> NodeInterno ID=" << id << " Prefixo=" << prefixo << std::endl;
 }
 
 unsigned int NodeInterno::NumFilhos(void) {
     unsigned int r = 0;
     for (char i = 'a'; i <= 'z'; i++) {
-        if (ponteiros[i]) r++;
+        if (ponteiros[i - 'a']) r++;
     }
     return r;
 }

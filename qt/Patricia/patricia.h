@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PATRICIA_H
+#define PATRICIA_H
 #include <memory>
 #include <string>
 #include <sstream>
@@ -22,7 +23,7 @@ class PayLoad {
             virtual void Lista(void) { return; };
             virtual void print(unsigned int identacao=0) {
                 std::string itmp(" ", identacao);
-                std::cout << "==> Node ID=" << id << std::endl; 
+                std::cout << "==> Node ID=" << id << std::endl;
             };
             virtual std::string Chave(void) { return ""; };
             unsigned int id;
@@ -50,8 +51,8 @@ class PayLoad {
         bool isFolha(void) { return true; };
         void Lista(void);
         void print(unsigned int identacao=0);
-        std::string Chave(void) { 
-            if (payload) return payload->chave; 
+        std::string Chave(void) {
+            if (payload) return payload->chave;
             return "";
         };
         NodeFolha(const PayLoad& p) : Node() {
@@ -81,10 +82,12 @@ class Patricia {
         void Lista(void);
         void ListaAux(std::shared_ptr<Node>, unsigned int );
         std::shared_ptr<RetornoBusca> Busca(const std::string&);
-        void BuscaAuxiliar(const std::string&, std::shared_ptr<Node>*, std::shared_ptr<RetornoBusca>); 
+        void BuscaAuxiliar(const std::string&, std::shared_ptr<Node>*, std::shared_ptr<RetornoBusca>);
         unsigned int AchaNivel (const std::string&, const std::string&);
         bool ComecaCom (const std::string&, const std::string&);
         std::string GeraDot(void);
         bool Remove(const std::string&);
         void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>, unsigned int, char);
 };
+
+#endif // PATRICIA_H
