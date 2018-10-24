@@ -26,11 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    patricia.cpp
+    patricia.cpp \
+    dialog_about.cpp
 
 HEADERS += \
         mainwindow.h \
-    patricia.h
+    patricia.h \
+    dialog_about.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    dialog_about.ui

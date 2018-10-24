@@ -209,6 +209,19 @@
         <string>Mostrar</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>450</y>
+         <width>89</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Limpar</string>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>
@@ -229,6 +242,7 @@
     <property name="title">
      <string>Arquivo</string>
     </property>
+    <addaction name="actionCarregar_chaves"/>
     <addaction name="actionSobre"/>
    </widget>
    <addaction name="menuArquivo"/>
@@ -245,6 +259,11 @@
   <action name="actionSobre">
    <property name="text">
     <string>Sobre...</string>
+   </property>
+  </action>
+  <action name="actionCarregar_chaves">
+   <property name="text">
+    <string>Carregar chaves</string>
    </property>
   </action>
  </widget>

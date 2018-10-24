@@ -89,6 +89,7 @@ class Patricia {
         bool Remove(const std::string&);
         void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>, unsigned int, char);
         char AchaChar(const std::string &, unsigned int);
+        void Limpa(void);
 };
 
 #endif // PATRICIA_H

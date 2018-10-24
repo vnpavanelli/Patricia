@@ -222,29 +222,19 @@ bool Patricia::Remove (const std::string& chave) {
     std::cout << "P:" << std::endl; if (r->p) r->p->get()->print(2);
     std::cout << "Q:" << std::endl; if (r->q) r->q->get()->print(2);
 
-    /* Checar se temos um nó p, se tiver ele deve ser do tipo interno */
-    if (r->p && r->p->get()->isInterno()) {
-        std::cout << "Remove: temos um nó P:" << std::endl;
-        r->p->get()->print();
-        auto tmp = std::static_pointer_cast<NodeInterno>(*(r->p));
-        unsigned int nivel = tmp->nivel;
-        char letra = chave.c_str()[nivel];
-        tmp->ponteiros[letra - 'a'] = nullptr;
+    (*r->q) = nullptr;
 
-        /* Temos um nó O */
-        if (tmp->NumFilhos() == 1 && r->o && r->o->get()->isInterno()) {
-            auto O = std::static_pointer_cast<NodeInterno>(*(r->o));
-            std::shared_ptr<Node> *tmp2 = nullptr;
-            for (char i='a'; i <= '{'; i++) {
-                if (O->ponteiros[i]) {
-                    tmp2 = &O->ponteiros[i];
-                    break;
+    if (r->p && (*r->p)) {
+        auto tmp = std::static_pointer_cast<NodeInterno>(*r->p);
+        if (tmp->NumFilhos() <= 1) {
+            std::shared_ptr<Node> nodeptr;
+            for (int i=0; i<27;i++) {
+                if (tmp->ponteiros[i]) {
+                    nodeptr = tmp->ponteiros[i];
                 }
             }
-            if (tmp2 != nullptr) {
-                /* Devemos ligar o nó O até o filho único tmp2 */
-                char letra2 = tmp2->get()->Chave().c_str()[O->nivel];
-                O->ponteiros[letra2 - 'a'] = (*tmp2);
+            if (nodeptr) {
+                (*r->p) = nodeptr;
             }
         }
     }
@@ -293,7 +283,7 @@ void Patricia::BuscaAuxiliar(const std::string& chave, std::shared_ptr<Node>* no
             // A chave não pode estar dentro do no interno
             return;
         }
-        char letra = chave.c_str()[tmp->nivel];
+        char letra = AchaChar(chave, tmp->nivel);
         std::cout << " -> nivel=" << tmp->nivel << " letra=" << letra << " ponteiro=" << letra-'a' << std::endl;
         auto no2 = &tmp->ponteiros[letra-'a'];
         BuscaAuxiliar(chave, no2, r);
@@ -324,7 +314,7 @@ bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
     while (*p1 != '\0' && *p2 != '\0' && *p1 == *p2) {
         p1++; p2++;
     }
-    if (*p2 == '\0' && *p1 != '\0') return true;
+    if (*p2 == '\0') return true;
     return false;
 }
 
@@ -348,4 +338,8 @@ unsigned int NodeInterno::NumFilhos(void) {
         if (ponteiros[i - 'a']) r++;
     }
     return r;
+}
+
+void Patricia::Limpa(void) {
+    raiz = nullptr;
 }

@@ -5,6 +5,9 @@
 #include <QProcess>
 #include <QGraphicsPixmapItem>
 #include <iostream>
+#include <dialog_about.h>
+#include <QFileDialog>
+#include <fstream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -53,4 +56,37 @@ void MainWindow::on_b_mostrar_clicked()
     QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
     scene->addItem(item);
     ui->graphicsView->show();
+}
+
+void MainWindow::on_actionSobre_triggered()
+{
+    dialog_about = new Dialog_About();
+    dialog_about->show();
+}
+
+void MainWindow::on_actionCarregar_chaves_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open Text file"), "", tr("Text Files (*.txt *.dic)"));
+    std::string arquivo = fileName.toStdString();
+    std::cout << "Iniciando teste, abrindo arquivo: " << arquivo << std::endl;
+    char buffer[256];
+    std::ifstream arq(arquivo, std::ifstream::in);
+    if (!arq.is_open()) {
+        std::cout << "Erro abrindo arquivo!" << std::endl;
+        return;
+    }
+    std::string prefixo("__");
+    while (arq.getline(buffer, 255)) {
+        std::cout << "Inserindo: " << buffer << std::endl;
+        p.Insere({buffer, prefixo+buffer});
+    }
+    on_b_mostrar_clicked();
+    return;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    p.Limpa();
+    on_b_mostrar_clicked();
 }

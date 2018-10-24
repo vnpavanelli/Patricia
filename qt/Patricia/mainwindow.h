@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <patricia.h>
-
+#include <dialog_about.h>
 namespace Ui {
 class MainWindow;
 }
@@ -23,9 +23,16 @@ private slots:
 
     void on_b_mostrar_clicked();
 
+    void on_actionSobre_triggered();
+
+    void on_actionCarregar_chaves_triggered();
+
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     Patricia p;
+    Dialog_About *dialog_about;
 };
 
 #endif // MAINWINDOW_H
