@@ -67,6 +67,7 @@ struct RetornoBusca {
 };
 
 
+typedef std::shared_ptr<Node> *NodePtr;
 
 
 class Patricia {
@@ -74,9 +75,10 @@ class Patricia {
         static unsigned int contador;
     private:
 
-    std::shared_ptr<Node> raiz;
+    std::shared_ptr<Node> raiz;    
+    void InsereAux(NodePtr node_superior, NodePtr node_inferior, NodePtr node_novo);
 
-    public:
+public:
         void Insere(const PayLoad &);
         void Insere(const std::string&, const std::string&);
         void Lista(void);
