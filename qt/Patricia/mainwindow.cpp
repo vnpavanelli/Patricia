@@ -8,6 +8,7 @@
 #include <dialog_about.h>
 #include <QFileDialog>
 #include <fstream>
+#include <mostradot.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,12 +38,12 @@ void MainWindow::on_b_mostrar_clicked()
 {
     QTemporaryFile tmpfile;
     if (tmpfile.open()) {
-        auto dot = p.GeraDot();
+        dot = p.GeraDot().c_str();
         QTextStream stream(&tmpfile);
-        stream << QString(dot.c_str());
-        std::cout << "DOT:" << std::endl << dot << std::endl;
+        stream << dot;
+//        std::cout << "DOT:" << std::endl << dot << std::endl;
     }
-    std::cout << "Dot gerado em: " << tmpfile.fileName().toStdString() << std::endl;
+//    std::cout << "Dot gerado em: " << tmpfile.fileName().toStdString() << std::endl;
     QStringList args;
     args << tmpfile.fileName() << "-Tpng" <<  "-o" << "tmp.png";
     QProcess processo;
@@ -78,7 +79,7 @@ void MainWindow::on_actionCarregar_chaves_triggered()
     }
     std::string prefixo("__");
     while (arq.getline(buffer, 255)) {
-        std::cout << "Inserindo: " << buffer << std::endl;
+//        std::cout << "Inserindo: " << buffer << std::endl;
         p.Insere({buffer, prefixo+buffer});
     }
     on_b_mostrar_clicked();
@@ -89,4 +90,11 @@ void MainWindow::on_pushButton_clicked()
 {
     p.Limpa();
     on_b_mostrar_clicked();
+}
+
+void MainWindow::on_b_dot_clicked()
+{
+    dialog_dot = new MostraDot();
+    dialog_dot->preencheDot(dot);
+    dialog_dot->show();
 }

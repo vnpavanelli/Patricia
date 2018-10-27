@@ -27,13 +27,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     patricia.cpp \
-    dialog_about.cpp
+    dialog_about.cpp \
+    mostradot.cpp
 
 HEADERS += \
         mainwindow.h \
     patricia.h \
-    dialog_about.h
+    dialog_about.h \
+    mostradot.h
 
 FORMS += \
         mainwindow.ui \
-    dialog_about.ui
+    dialog_about.ui \
+    mostradot.ui

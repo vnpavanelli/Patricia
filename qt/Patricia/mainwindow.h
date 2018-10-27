@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <patricia.h>
 #include <dialog_about.h>
+#include <mostradot.h>
 namespace Ui {
 class MainWindow;
 }
@@ -29,10 +30,14 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_b_dot_clicked();
+
 private:
     Ui::MainWindow *ui;
     Patricia p;
     Dialog_About *dialog_about;
+    MostraDot *dialog_dot;
+    QString dot;
 };
 
 #endif // MAINWINDOW_H

@@ -61,7 +61,7 @@ class PayLoad {
     };
 
 struct RetornoBusca {
-    std::shared_ptr<Node> *p = nullptr, *q = nullptr, *o = nullptr;
+    std::shared_ptr<Node> *p = nullptr, *q = nullptr; //, *o = nullptr;
     bool achou=false;
     std::shared_ptr<PayLoad> payload;
 };
@@ -87,7 +87,7 @@ class Patricia {
         bool ComecaCom (const std::string&, const std::string&);
         std::string GeraDot(void);
         bool Remove(const std::string&);
-        void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>, unsigned int, char);
+        void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>);
         char AchaChar(const std::string &, unsigned int);
         void Limpa(void);
 };

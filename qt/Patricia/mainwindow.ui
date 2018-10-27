@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Arvore Patricia</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -220,6 +220,19 @@
        </property>
        <property name="text">
         <string>Limpar</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="b_dot">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>380</y>
+         <width>89</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Ver DOT</string>
        </property>
       </widget>
      </widget>
