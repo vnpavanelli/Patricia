@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 #define NUMARY 27
 
@@ -74,6 +75,7 @@ class PayLoad {
             uint8_t tipo;
             std::string chave;
             Node(uint8_t t = TIPO::NODE, const std::string &c="");
+            ~Node();
     };
 
 typedef Node *NodePtr;
@@ -121,6 +123,7 @@ private:
     void LimpaInterno (NodePtr);
 public:
     static unsigned int contador;
+//    static std::map<unsigned int, NodePtr> mapa;
     void Insere(const std::string &s) {
         Insere(s,s);
     }
@@ -131,6 +134,7 @@ public:
         bool Remove(const std::string&);
         void Limpa(void);
         Patricia() : raiz(nullptr) {};
+        ~Patricia() { Limpa(); };
 };
 
 #endif // PATRICIA_H

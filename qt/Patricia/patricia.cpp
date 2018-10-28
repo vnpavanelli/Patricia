@@ -6,6 +6,7 @@
 
 /* Contador para o ID de cada nó */
 unsigned int Patricia::contador = 0;
+//std::map<unsigned int, NodePtr> Patricia::mapa;
 
 /* Insere deve receber um PayLoad, se receber duas strings, converter e chamar a função correta */
 void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
@@ -42,8 +43,8 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
     /* Preparamos o no interno, com o nivel e as duas folhas */
 //    node_interno->nivel = nivel;
 //    node_interno->chave = std::string(chave_novo, 0, nivel);
-    node_interno->ponteiros[Traducao::Direta[p_novo]] = node_novo;
-    node_interno->ponteiros[Traducao::Direta[p_inferior]] = node_inferior;
+    node_interno->ponteiros[Traducao::Direta[(uint) p_novo]] = node_novo;
+    node_interno->ponteiros[Traducao::Direta[(uint) p_inferior]] = node_inferior;
 
     /* Apontamos o nó superior para o novo nó interno */
     (*node_superior) = node_interno;
@@ -54,6 +55,7 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
 void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
     /* Cria um nó novo contendo o payload */
     auto node_novo = new NodeFolha(chave, pay);
+//    Patricia::mapa[node_novo->id] = (NodePtr) node_novo;
 //    auto node_novo = std::static_pointer_cast<Node>(std::make_shared<NodeFolha>(pay));
 
     /* Se a raiz é nula podemos inserir uma folha nela e termina */
@@ -80,6 +82,8 @@ void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
 
     /* Se achou termina */
     if (aux.achou) {
+//        Patricia::mapa.erase(node_novo->id);
+        delete node_novo;
         return;
     }
 
@@ -152,6 +156,7 @@ bool Patricia::Remove (const std::string& chave) {
     if (!r.achou) return false;
 
     /* Remove o nó contendo a chave */
+//    Patricia::mapa.erase((*r.q)->id);
     delete *r.q;
     (*r.q) = nullptr;
 
@@ -170,6 +175,7 @@ bool Patricia::Remove (const std::string& chave) {
             }
             /* E se encontrar o filho, substitua o link do nó pelo filho, eliminando o nó interno */
             if (nodeptr) {
+//                Patricia::mapa.erase((*r.p)->id);
                 delete *r.p;
                 (*r.p) = nodeptr;
             }
@@ -226,7 +232,7 @@ void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, Retorn
         }
         /* Caso contrário vamos procurar o ramo a seguir */
         char letra = AchaChar(chave, tmp->nivel);
-        NodePtr* no2 = &tmp->ponteiros[Traducao::Direta[letra]];
+        NodePtr* no2 = &tmp->ponteiros[Traducao::Direta[(uint) letra]];
         /* E chamar a busca recursiva a partir deste ramo */
         BuscaAuxiliar(chave, no2, r);
         return;
@@ -262,6 +268,11 @@ bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
 
 Node::Node(uint8_t t, const std::string &c) : tipo(t), chave(c) {
     this->id = ++Patricia::contador;
+//    std::cout << "Criando nó " << this->id << " Chave=" << c <<  std::endl;
+}
+
+Node::~Node() {
+//    std::cout << "Removendo nó " << this->id << std::endl;
 }
 
 unsigned int NodeInterno::NumFilhos(void) const {
@@ -279,12 +290,14 @@ void Patricia::Limpa(void) {
 
 void Patricia::LimpaInterno(NodePtr no) {
     if (no==nullptr) return;
+//    std::cout << "LimpaInterno id=" << no->id << " chave=" << no->chave << std::endl;
     if (no->isInterno()) {
         auto tmp = (NodeInterno*) no;
         for (int i=0; i<NUMARY; i++) {
             LimpaInterno(tmp->ponteiros[i]);
         }
     }
+//    Patricia::mapa.erase(no->id);
     delete no;
     return;
 }
