@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
+#include <cstring>
 
 /* Contador para o ID de cada nó */
 unsigned int Patricia::contador = 0;
@@ -113,6 +114,7 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
     if (no->isFolha()) {
         NodeFolha* tmp = (NodeFolha*) no;
         definicoes << "no" << tmp->id << " [shape=ellipse, label=\"" << tmp->chave << "\"];" << std::endl;
+        return;
     }
     if (no->isInterno()) {
         NodeInterno* tmp = (NodeInterno*) no;
@@ -128,12 +130,16 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
         }
         definicoes << "}}\"];" << std::endl;
 
-        for (char i='a'; i <= '{'; i++) {
-            if (tmp->ponteiros[i-'a']) {
-                GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i-'a']);
-            }
+        for (int i=0; i < NUMARY; i++) {
+            if (tmp->ponteiros[i])
+                GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i]);
         }
-
+//        for (char i='a'; i <= '{'; i++) {
+//            if (tmp->ponteiros[i-'a']) {
+//                GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i-'a']);
+//            }
+//        }
+        return;
     }
 }
 
@@ -201,7 +207,6 @@ void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, Retorn
      /* Se o nó for folha */
      if ((*no)->isFolha()) {
          auto tmp = (NodeFolha*) *no;
-//       auto tmp = std::static_pointer_cast<NodeFolha>(*no);
        /* Se a chave do nó for a procurada */
        if (tmp->chave == chave) {
            /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
@@ -216,7 +221,6 @@ void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, Retorn
     /* Se o nó for interno */
     if ((*no)->isInterno()) {
         auto tmp = (NodeInterno*) *no;
-//        auto tmp = std::static_pointer_cast<NodeInterno>(*no);
         /* Se o prefixo do nó for diferente da chave podemos retornar */
         if (!ComecaCom(chave, tmp->chave)) {
             return;
@@ -251,15 +255,14 @@ unsigned int Patricia::AchaNivel (const std::string& k1, const std::string& k2) 
 bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
     /* p1 aponta pro começo de s1 e p2 pro começo de pre */
     const char *p1 = s1.c_str(), *p2 = pre.c_str();
+    return (memcmp(p1, p2, pre.size())==0);
     /* Enquanto não chegarem ao fim das strings e forem iguais incremente */
-    while (*p1 != '\0' && *p2 != '\0' && *p1 == *p2) {
-        p1++; p2++;
-    }
-    return (*p2 == '\0');
+//    for (; *p1 != '\0' && *p2 != '\0'; ++p1, ++p2) if (*p1 != *p2) return false;
+//    return (*p2 == '\0');
 }
 
 Node::Node(uint8_t t) : tipo(t) {
-    this->id = Patricia::contador++;
+    this->id = ++Patricia::contador;
 }
 
 unsigned int NodeInterno::NumFilhos(void) const {
