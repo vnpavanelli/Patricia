@@ -20,24 +20,24 @@ class PayLoad {
 
     class Node {
         public:
-            bool isInterno(void) { return tipo == TIPO::INTERNO; };
-            bool isFolha(void) { return tipo == TIPO::FOLHA; };
-            const std::string Chave(void) { return chave; };
+            bool isInterno(void) const { return tipo == TIPO::INTERNO; };
+            bool isFolha(void) const { return tipo == TIPO::FOLHA; };
+            const std::string Chave(void) const { return chave; };
             unsigned int id;
             uint8_t tipo;
             std::string chave;
-            Node();
-            Node(int t);
+            Node(uint8_t t = TIPO::NODE);
     };
 
-typedef std::shared_ptr<Node> *NodePtr;
+typedef Node *NodePtr;
 
 
     class NodeInterno : public Node {
         public:
-        unsigned int NumFilhos(void);
+        unsigned int NumFilhos(void) const;
         unsigned int nivel;
-        std::shared_ptr<Node> ponteiros[NUMARY];
+        NodePtr ponteiros[NUMARY] = {};
+//        std::shared_ptr<Node> ponteiros[NUMARY];
         NodeInterno() : Node(TIPO::INTERNO) {};
     };
 
@@ -49,37 +49,40 @@ typedef std::shared_ptr<Node> *NodePtr;
             conteudo = p.conteudo;
             chave = p.chave;
         };
-        std::shared_ptr<PayLoad> payload(void) {
+        std::shared_ptr<PayLoad> payload(void) const {
             return std::make_shared<PayLoad>(chave, conteudo);
         }
     };
 
 struct RetornoBusca {
-    NodePtr p = nullptr, q = nullptr;
+    NodePtr *p = nullptr, *q = nullptr;
     bool achou=false;
     std::shared_ptr<PayLoad> payload;
 };
 
 
-
-
 class Patricia {
 private:
-    std::shared_ptr<Node> raiz;    
-    void InsereAux(NodePtr node_superior, NodePtr node_inferior, NodePtr node_novo);
-    void BuscaAuxiliar(const std::string&, NodePtr, std::shared_ptr<RetornoBusca>);
-    unsigned int AchaNivel (const std::string&, const std::string&);
-    bool ComecaCom (const std::string&, const std::string&);
-    void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>);
-    char AchaChar(const std::string &, unsigned int);
+    NodePtr raiz;
+
+    static unsigned int AchaNivel (const std::string&, const std::string&);
+    static bool ComecaCom (const std::string&, const std::string&);
+    static char AchaChar(const std::string &, unsigned int);
+
+    static void BuscaAuxiliar(const std::string&, const NodePtr*, std::shared_ptr<RetornoBusca>);
+    void GeraDotAux(std::stringstream&, std::stringstream&, NodePtr) const;
+
+    static void InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo);
+    void LimpaInterno (NodePtr);
 public:
     static unsigned int contador;
         void Insere(const PayLoad &);
         void Insere(const std::string&, const std::string&);
-        std::shared_ptr<RetornoBusca> Busca(const std::string&);
-        std::string GeraDot(void);
+        std::shared_ptr<RetornoBusca> Busca(const std::string&) const;
+        std::string GeraDot(void) const;
         bool Remove(const std::string&);
         void Limpa(void);
+        Patricia() : raiz(nullptr) {};
 };
 
 #endif // PATRICIA_H

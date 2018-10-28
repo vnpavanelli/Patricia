@@ -15,9 +15,8 @@ void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
  * Deve retornar '{' no caso do fim da string, para funcionar corretamente
  */
 char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
-    const char *p = in.c_str();
-    char r = *(p+nivel);
-    if (r == '\0') return '{';
+    const char r = in.c_str()[nivel];
+    if (r < 'a' || r > 'z') return '{';
     return r;
 }
 
@@ -25,24 +24,24 @@ char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
  * Cria um novo nó interno, inserindo o node_inferior e o node_novo nele.
  * Linka o node_superior para o nó interno
  */
-void Patricia::InsereAux(NodePtr node_superior, NodePtr node_inferior, NodePtr node_novo) {
+void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo) {
     /* Cria o nó interno */
-    auto node_interno = std::make_shared<NodeInterno>();
+    auto node_interno = new NodeInterno();
 
     /* Salva as chaves */
-    const std::string chave_novo = node_novo->get()->chave;
-    const std::string chave_inferior = node_inferior->get()->chave;
+    const std::string& chave_novo = node_novo->chave;
+    const std::string& chave_inferior = node_inferior->chave;
 
     /* Acha o nivel que as strings divergem e o caractere de cada uma */
-    auto nivel = AchaNivel(chave_inferior, chave_novo);
+    const  unsigned int nivel = AchaNivel(chave_inferior, chave_novo);
     const char p_novo = AchaChar(chave_novo, nivel);
     const char p_inferior = AchaChar(chave_inferior, nivel);
 
     /* Preparamos o no interno, com o nivel e as duas folhas */
     node_interno->nivel = nivel;
     node_interno->chave = std::string(chave_novo, 0, nivel);
-    node_interno->ponteiros[p_novo - 'a'] = (*node_novo);
-    node_interno->ponteiros[p_inferior - 'a'] = (*node_inferior);
+    node_interno->ponteiros[p_novo - 'a'] = node_novo;
+    node_interno->ponteiros[p_inferior - 'a'] = node_inferior;
 
     /* Apontamos o nó superior para o novo nó interno */
     (*node_superior) = node_interno;
@@ -52,10 +51,11 @@ void Patricia::InsereAux(NodePtr node_superior, NodePtr node_inferior, NodePtr n
 /* Insere o PayLoad na árvore */
 void Patricia::Insere(const PayLoad &pay) {
     /* Cria um nó novo contendo o payload */
-    auto node_novo = std::static_pointer_cast<Node>(std::make_shared<NodeFolha>(pay));
+    auto node_novo = new NodeFolha(pay);
+//    auto node_novo = std::static_pointer_cast<Node>(std::make_shared<NodeFolha>(pay));
 
     /* Se a raiz é nula podemos inserir uma folha nela e termina */
-    if (raiz.get() == nullptr) {
+    if (raiz == nullptr) {
         raiz = node_novo;
         return;
     }
@@ -63,13 +63,13 @@ void Patricia::Insere(const PayLoad &pay) {
     /* Se a raiz é uma simples folha, inserimos um no interno dividindo entra a folha e no que vamos criar */
     if (raiz->isFolha()) {
         if (raiz->Chave() == pay.chave) return;
-        InsereAux(&raiz, &raiz, &node_novo);
+        InsereAux(&raiz, raiz, node_novo);
         return;
     }
 
     /* Se a raiz é um no interno precisamos checar se ele contem o prefixo da chave */
     if (raiz->isInterno() && !ComecaCom(pay.chave, raiz->Chave())) {
-        InsereAux(&raiz, &raiz, &node_novo);
+        InsereAux(&raiz, raiz, node_novo);
         return;
     }
 
@@ -82,18 +82,18 @@ void Patricia::Insere(const PayLoad &pay) {
     }
 
     /* Caso tenha chegado em um nó nulo, insira a chave neste nó */
-    if (aux->q && !aux->q->get()) {
-        (*aux->q) = node_novo;
+    if ((aux->q != nullptr) && (*(aux->q) == nullptr)) {
+        *(aux->q) = node_novo;
         return;
     }
 
     /* Se não, prossiga criando um nó interno e inserindo ela neste nó */
-    InsereAux(aux->q, aux->q, &node_novo);
+    InsereAux(aux->q, *(aux->q), node_novo);
     return;
 }
 
 /* Gera um arquivo DOT para a árvore */
-std::string Patricia::GeraDot(void) {
+std::string Patricia::GeraDot(void) const {
     std::stringstream definicoes, ligacoes;
     GeraDotAux(definicoes, ligacoes, raiz);
 
@@ -108,14 +108,14 @@ std::string Patricia::GeraDot(void) {
 }
 
 /* Funcao recursiva para gerar o DOT */
-void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& ligacoes, std::shared_ptr<Node> no) {
-    if (!no) return;
+void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& ligacoes, NodePtr no) const {
+    if (no == nullptr) return;
     if (no->isFolha()) {
-        NodeFolha* tmp = (NodeFolha*) no.get();
+        NodeFolha* tmp = (NodeFolha*) no;
         definicoes << "no" << tmp->id << " [shape=ellipse, label=\"" << tmp->chave << "\"];" << std::endl;
     }
     if (no->isInterno()) {
-        NodeInterno* tmp = (NodeInterno*) no.get();
+        NodeInterno* tmp = (NodeInterno*) no;
         definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->chave <<  "| {";
         bool virgula = false;
         for (char i='a'; i <= '{'; i++) {
@@ -151,11 +151,12 @@ bool Patricia::Remove (const std::string& chave) {
 
     /* Se existir um nó superior */
     if (r->p && (*r->p)) {
-        auto tmp = std::static_pointer_cast<NodeInterno>(*r->p);
+        auto tmp = (NodeInterno*) (*r->p);
+//        auto tmp = std::static_pointer_cast<NodeInterno>(*r->p);
         /* Se este nó só conter um único filho */
         if (tmp->NumFilhos() <= 1) {
             /* Procure este filho */
-            std::shared_ptr<Node> nodeptr;
+            NodePtr nodeptr = nullptr;
             for (int i=0; i<27;i++) {
                 if (tmp->ponteiros[i]) {
                     nodeptr = tmp->ponteiros[i];
@@ -171,10 +172,9 @@ bool Patricia::Remove (const std::string& chave) {
 }
 
 /* Faz a busca por uma chave na árvore */
-std::shared_ptr<RetornoBusca> Patricia::Busca(const std::string& chave) {
+std::shared_ptr<RetornoBusca> Patricia::Busca(const std::string& chave) const {
     /* Cria o objeto de retorno da busca */
     auto r = std::make_shared<RetornoBusca>();
-    r->achou = false;
     /* Se não existir uma raiz, a busca é falsa */
     if (!raiz) {
         return r;
@@ -185,19 +185,21 @@ std::shared_ptr<RetornoBusca> Patricia::Busca(const std::string& chave) {
 }
 
 /* Função recursiva para a Busca */
-void Patricia::BuscaAuxiliar(const std::string& chave, NodePtr no, std::shared_ptr<RetornoBusca> r) {
+void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, std::shared_ptr<RetornoBusca> r) {
     /* Move os ponteiros p e q */
      r->p = r->q;
-     r->q = no;
-
-     /* Se o nó atual for nulo podemos retornar */
-     if (!(*no)) {
+     if (no != nullptr) {
+         r->q = const_cast<NodePtr*>(no);
+         if (*no == nullptr) return;
+     } else {
+         r->q = nullptr;
          return;
      }
 
      /* Se o nó for folha */
-     if (no->get()->isFolha()) {
-       auto tmp = std::static_pointer_cast<NodeFolha>(*no);
+     if ((*no)->isFolha()) {
+         auto tmp = (NodeFolha*) *no;
+//       auto tmp = std::static_pointer_cast<NodeFolha>(*no);
        /* Se a chave do nó for a procurada */
        if (tmp->chave == chave) {
            /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
@@ -210,15 +212,16 @@ void Patricia::BuscaAuxiliar(const std::string& chave, NodePtr no, std::shared_p
     }
 
     /* Se o nó for interno */
-    if (no->get()->isInterno()) {
-        auto tmp = std::static_pointer_cast<NodeInterno>(*no);
+    if ((*no)->isInterno()) {
+        auto tmp = (NodeInterno*) *no;
+//        auto tmp = std::static_pointer_cast<NodeInterno>(*no);
         /* Se o prefixo do nó for diferente da chave podemos retornar */
         if (!ComecaCom(chave, tmp->chave)) {
             return;
         }
         /* Caso contrário vamos procurar o ramo a seguir */
         char letra = AchaChar(chave, tmp->nivel);
-        auto no2 = &tmp->ponteiros[letra-'a'];
+        NodePtr* no2 = &tmp->ponteiros[letra-'a'];
         /* E chamar a busca recursiva a partir deste ramo */
         BuscaAuxiliar(chave, no2, r);
         return;
@@ -250,26 +253,34 @@ bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
     while (*p1 != '\0' && *p2 != '\0' && *p1 == *p2) {
         p1++; p2++;
     }
-    /* Se chegamos ao final do prefixo, ele esta contido na string s1 */
-    if (*p2 == '\0') return true;
-    /* Se não chegamos, a string não começa com o prefixo */
-    return false;
+    return (*p2 == '\0');
 }
 
-Node::Node() : Node(NODE) {};
-
-Node::Node(int t) : tipo(t) {
+Node::Node(uint8_t t) : tipo(t) {
     this->id = Patricia::contador++;
 }
 
-unsigned int NodeInterno::NumFilhos(void) {
+unsigned int NodeInterno::NumFilhos(void) const {
     unsigned int r = 0;
-    for (char i = 'a'; i <= '{'; i++) {
-        if (ponteiros[i - 'a']) r++;
+    for (int i=0; i<NUMARY; i++) {
+        if (ponteiros[i]) r++;
     }
     return r;
 }
 
 void Patricia::Limpa(void) {
-    raiz = nullptr;
+    LimpaInterno(raiz);
+    raiz=nullptr;
+}
+
+void Patricia::LimpaInterno(NodePtr no) {
+    if (no==nullptr) return;
+    if (no->isInterno()) {
+        auto tmp = (NodeInterno*) no;
+        for (int i=0; i<NUMARY; i++) {
+            LimpaInterno(tmp->ponteiros[i]);
+        }
+    }
+    delete no;
+    return;
 }
