@@ -17,9 +17,9 @@ void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
  */
 char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
     const char r = in.c_str()[nivel];
-    if (r < 'a' || r > 'z') return '{';
     return r;
 }
+
 
 /*
  * Cria um novo nó interno, inserindo o node_inferior e o node_novo nele.
@@ -41,8 +41,8 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
     /* Preparamos o no interno, com o nivel e as duas folhas */
     node_interno->nivel = nivel;
     node_interno->chave = std::string(chave_novo, 0, nivel);
-    node_interno->ponteiros[p_novo - 'a'] = node_novo;
-    node_interno->ponteiros[p_inferior - 'a'] = node_inferior;
+    node_interno->ponteiros[Traducao::Direta[p_novo]] = node_novo;
+    node_interno->ponteiros[Traducao::Direta[p_inferior]] = node_inferior;
 
     /* Apontamos o nó superior para o novo nó interno */
     (*node_superior) = node_interno;
@@ -120,25 +120,23 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
         NodeInterno* tmp = (NodeInterno*) no;
         definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->chave <<  "| {";
         bool virgula = false;
-        for (char i='a'; i <= '{'; i++) {
-            if (tmp->ponteiros[i-'a']) {
+
+        for (int i=0; i < NUMARY; i++) {
+            if (tmp->ponteiros[i]) {
                 if (virgula) definicoes << " | ";
                  else virgula = true;
-                definicoes << "<f" << (i<='z'?i:'9') << "> " << (i<='z'?i:' ');
-                ligacoes << "no" << tmp->id << ":f" << (i<='z'?i:'9') << " -> no" << tmp->ponteiros[i-'a']->id << (tmp->ponteiros[i-'a']->isFolha() ? "" : ":f0") << ";" << std::endl;
+                definicoes << "<f" << Traducao::Reversa2[i] << "> " << Traducao::Reversa[i];
+                ligacoes << "no" << tmp->id << ":f" << Traducao::Reversa2[i] << " -> no" << tmp->ponteiros[i]->id << (tmp->ponteiros[i]->isFolha() ? "" : ":f0") << ";" << std::endl;
+
             }
         }
+
         definicoes << "}}\"];" << std::endl;
 
         for (int i=0; i < NUMARY; i++) {
             if (tmp->ponteiros[i])
                 GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i]);
         }
-//        for (char i='a'; i <= '{'; i++) {
-//            if (tmp->ponteiros[i-'a']) {
-//                GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i-'a']);
-//            }
-//        }
         return;
     }
 }
@@ -164,7 +162,7 @@ bool Patricia::Remove (const std::string& chave) {
         if (tmp->NumFilhos() <= 1) {
             /* Procure este filho */
             NodePtr nodeptr = nullptr;
-            for (int i=0; i<27;i++) {
+            for (int i=0; i<NUMARY;i++) {
                 if (tmp->ponteiros[i]) {
                     nodeptr = tmp->ponteiros[i];
                 }
@@ -227,7 +225,7 @@ void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, Retorn
         }
         /* Caso contrário vamos procurar o ramo a seguir */
         char letra = AchaChar(chave, tmp->nivel);
-        NodePtr* no2 = &tmp->ponteiros[letra-'a'];
+        NodePtr* no2 = &tmp->ponteiros[Traducao::Direta[letra]];
         /* E chamar a busca recursiva a partir deste ramo */
         BuscaAuxiliar(chave, no2, r);
         return;
