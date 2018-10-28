@@ -60,10 +60,10 @@ const char Reversa[] = {
 
 class PayLoad {
     public:
-        std::string chave;
+//        std::string chave;
         std::string conteudo;
-        PayLoad(const std::string& ch, const std::string& co) : chave(ch), conteudo(co) { };
-        PayLoad(void) : chave(""), conteudo("") {};
+        PayLoad(/*const std::string& ch,*/ const std::string& co) : /*chave(ch),*/ conteudo(co) { };
+        PayLoad(void) : /*chave(""),*/ conteudo("") {};
 };
 
     class Node {
@@ -74,7 +74,8 @@ class PayLoad {
             unsigned int id;
             uint8_t tipo;
             std::string chave;
-            Node(uint8_t t = TIPO::NODE);
+//            Node(uint8_t t = TIPO::NODE);
+            Node(uint8_t t = TIPO::NODE, const std::string &c="");
     };
 
 typedef Node *NodePtr;
@@ -91,14 +92,12 @@ typedef Node *NodePtr;
 
     class NodeFolha : public Node {
         private:
-            std::string conteudo;
+            PayLoad _payload;
+//            std::string conteudo;
         public:
-        NodeFolha(const PayLoad& p) : Node(TIPO::FOLHA) {
-            conteudo = p.conteudo;
-            chave = p.chave;
-        };
+        NodeFolha(const std::string& c, const PayLoad& p) : Node(TIPO::FOLHA, c), _payload(p) {};
         std::shared_ptr<PayLoad> payload(void) const {
-            return std::make_shared<PayLoad>(chave, conteudo);
+            return std::make_shared<PayLoad>(_payload);
         }
     };
 
@@ -125,7 +124,10 @@ private:
     void LimpaInterno (NodePtr);
 public:
     static unsigned int contador;
-        void Insere(const PayLoad &);
+    void Insere(const std::string &s) {
+        Insere(s,s);
+    }
+        void Insere(const std::string&, const PayLoad &);
         void Insere(const std::string&, const std::string&);
         RetornoBusca Busca(const std::string&) const;
         std::string GeraDot(void) const;

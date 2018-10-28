@@ -9,7 +9,7 @@ unsigned int Patricia::contador = 0;
 
 /* Insere deve receber um PayLoad, se receber duas strings, converter e chamar a função correta */
 void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
-    return Patricia::Insere(PayLoad(chave, conteudo));
+    return Patricia::Insere(chave, PayLoad(conteudo));
 }
 
 /* Função que acha o caractere no nível da string
@@ -50,9 +50,9 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
 }
 
 /* Insere o PayLoad na árvore */
-void Patricia::Insere(const PayLoad &pay) {
+void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
     /* Cria um nó novo contendo o payload */
-    auto node_novo = new NodeFolha(pay);
+    auto node_novo = new NodeFolha(chave, pay);
 //    auto node_novo = std::static_pointer_cast<Node>(std::make_shared<NodeFolha>(pay));
 
     /* Se a raiz é nula podemos inserir uma folha nela e termina */
@@ -63,19 +63,19 @@ void Patricia::Insere(const PayLoad &pay) {
 
     /* Se a raiz é uma simples folha, inserimos um no interno dividindo entra a folha e no que vamos criar */
     if (raiz->isFolha()) {
-        if (raiz->Chave() == pay.chave) return;
+        if (raiz->Chave() == chave) return;
         InsereAux(&raiz, raiz, node_novo);
         return;
     }
 
     /* Se a raiz é um no interno precisamos checar se ele contem o prefixo da chave */
-    if (raiz->isInterno() && !ComecaCom(pay.chave, raiz->Chave())) {
+    if (raiz->isInterno() && !ComecaCom(chave, raiz->Chave())) {
         InsereAux(&raiz, raiz, node_novo);
         return;
     }
 
     /* Procura pela chave na árvore */
-    auto aux = Busca(pay.chave);
+    auto aux = Busca(chave);
 
     /* Se achou termina */
     if (aux.achou) {
@@ -259,7 +259,7 @@ bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
 //    return (*p2 == '\0');
 }
 
-Node::Node(uint8_t t) : tipo(t) {
+Node::Node(uint8_t t, const std::string &c) : tipo(t), chave(c) {
     this->id = ++Patricia::contador;
 }
 

@@ -25,7 +25,7 @@ private slots:
 
 private:
     Ui::BenchMark *ui;
-    std::vector<PayLoad> chaves;
+    std::vector<std::string> chaves;
     Patricia arvore;
 
     void print(const QString&);

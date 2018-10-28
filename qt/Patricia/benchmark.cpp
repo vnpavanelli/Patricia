@@ -64,7 +64,7 @@ void BenchMark::on_b_dicionario_clicked()
     char buffer[256];
     chaves.clear();
     while (arq.getline(buffer, 255)) {
-        chaves.push_back({buffer, buffer});
+        chaves.push_back(buffer);
     }
     print ("Inseridas " + std::to_string(chaves.size()) + " chaves");
     return;
@@ -80,15 +80,12 @@ double BenchMark::bench_insert(int pct)
     int i = round(chaves.size()*((double) pct/100.0));
     std::vector<std::string> tmp;
     arvore.Limpa();
-    int mem_antes = mem_usage();
     auto start = std::chrono::system_clock::now();
     for (auto const& j: chaves) {
         arvore.Insere(j);
         if (--i <= 0) break;
     }
     auto end = std::chrono::system_clock::now();
-    int mem_depois = mem_usage();
-//    print("Memoria Patricia: " + to_string(mem_depois-mem_antes));
     std::chrono::duration<double> elapsed_seconds = end-start;
     arvore.Limpa();
     return elapsed_seconds.count();
@@ -99,15 +96,12 @@ double BenchMark::bench_insert_map(int pct)
     int i = round(chaves.size()*((double) pct/100.0));
     std::vector<std::string> tmp;
     std::map<std::string, std::string> mapa;
-    int mem_antes = mem_usage();
     auto start = std::chrono::system_clock::now();
     for (auto const& j: chaves) {
-        mapa[j.chave] = j.conteudo;
+        mapa[j] = j;
         if (--i <= 0) break;
     }
     auto end = std::chrono::system_clock::now();
-    int mem_depois = mem_usage();
-//    print("Memoria MAP: " + to_string(mem_depois-mem_antes));
     std::chrono::duration<double> elapsed_seconds = end-start;
     return elapsed_seconds.count();
 }
@@ -120,7 +114,7 @@ double BenchMark::bench_search(int pct)
     for (auto const& j: chaves) arvore.Insere(j);
     auto start = std::chrono::system_clock::now();
     for (auto const& j: chaves) {
-        auto tmp = arvore.Busca(j.chave);
+        auto tmp = arvore.Busca(j);
         if (--i <= 0) break;
     }
     auto end = std::chrono::system_clock::now();
@@ -136,11 +130,11 @@ double BenchMark::bench_search_map(int pct)
     std::vector<std::string> tmp;
     std::map<std::string, std::string> mapa;
     for (auto const& j: chaves) {
-        mapa[j.chave] = j.conteudo;
+        mapa[j] = j;
     }
     auto start = std::chrono::system_clock::now();
     for (auto const& j: chaves) {
-        auto tmp = mapa.at(j.chave);
+        auto tmp = mapa.at(j);
         if (--i <= 0) break;
     }
     auto end = std::chrono::system_clock::now();
@@ -156,7 +150,7 @@ double BenchMark::bench_remove(int pct)
     for (auto const& j: chaves) arvore.Insere(j);
     auto start = std::chrono::system_clock::now();
     for (auto const& j: chaves) {
-        arvore.Remove(j.chave);
+        arvore.Remove(j);
         if (--i <= 0) break;
     }
     auto end = std::chrono::system_clock::now();
@@ -172,11 +166,11 @@ double BenchMark::bench_remove_map(int pct)
     std::vector<std::string> tmp;
     std::map<std::string, std::string> mapa;
     for (auto const& j: chaves) {
-        mapa[j.chave] = j.conteudo;
+        mapa[j] = j;
     }
     auto start = std::chrono::system_clock::now();
     for (auto const& j: chaves) {
-        mapa.erase(j.chave);
+        mapa.erase(j);
         if (--i <= 0) break;
     }
     auto end = std::chrono::system_clock::now();

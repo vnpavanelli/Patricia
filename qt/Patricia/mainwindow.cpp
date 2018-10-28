@@ -30,7 +30,7 @@ void MainWindow::on_b_remover_clicked()
 
 void MainWindow::on_b_inserir_clicked()
 {
-    p.Insere({ui->i_chave->text().toStdString()  , ui->i_conteudo->text().toStdString()});
+    p.Insere(ui->i_chave->text().toStdString(), ui->i_conteudo->text().toStdString());
     on_b_mostrar_clicked();
 }
 
@@ -80,7 +80,7 @@ void MainWindow::on_actionCarregar_chaves_triggered()
     std::string prefixo("__");
     while (arq.getline(buffer, 255)) {
 //        std::cout << "Inserindo: " << buffer << std::endl;
-        p.Insere({buffer, prefixo+buffer});
+        p.Insere(buffer, prefixo+buffer);
     }
     on_b_mostrar_clicked();
     return;
