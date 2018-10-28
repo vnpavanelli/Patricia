@@ -7,6 +7,8 @@
 
 #define NUMARY 27
 
+//enum TIPO {NODE=0, INTERNO=1, FOLHA=2};
+enum  TIPO: uint8_t {NODE=0, INTERNO=1, FOLHA=2};
 
 class PayLoad {
     public:
@@ -18,79 +20,65 @@ class PayLoad {
 
     class Node {
         public:
-            virtual bool isInterno(void) { return false; };
-            virtual bool isFolha(void) { return false; };
-            virtual void Lista(void) { return; };
-            virtual void print(unsigned int identacao=0) {
-                std::string itmp(" ", identacao);
-                std::cout << "==> Node ID=" << id << std::endl;
-            };
-            virtual std::string Chave(void) { return ""; };
+            bool isInterno(void) { return tipo == TIPO::INTERNO; };
+            bool isFolha(void) { return tipo == TIPO::FOLHA; };
+            const std::string Chave(void) { return chave; };
             unsigned int id;
+            uint8_t tipo;
+            std::string chave;
             Node();
+            Node(int t);
     };
+
+typedef std::shared_ptr<Node> *NodePtr;
+
 
     class NodeInterno : public Node {
         public:
-        bool isInterno(void) { return true; };
-        bool isFolha(void) { return false; };
-        void print(unsigned int identacao=0);
-        std::string Chave(void) { return prefixo; };
         unsigned int NumFilhos(void);
         unsigned int nivel;
-        std::string prefixo;
         std::shared_ptr<Node> ponteiros[NUMARY];
-        NodeInterno() : Node() {};
+        NodeInterno() : Node(TIPO::INTERNO) {};
     };
 
     class NodeFolha : public Node {
         private:
+            std::string conteudo;
         public:
-            std::shared_ptr<PayLoad> payload;
-        bool isInterno(void) { return false; };
-        bool isFolha(void) { return true; };
-        void Lista(void);
-        void print(unsigned int identacao=0);
-        std::string Chave(void) {
-            if (payload) return payload->chave;
-            return "";
+        NodeFolha(const PayLoad& p) : Node(TIPO::FOLHA) {
+            conteudo = p.conteudo;
+            chave = p.chave;
         };
-        NodeFolha(const PayLoad& p) : Node() {
-            payload = std::make_shared<PayLoad>(p);
-        };
+        std::shared_ptr<PayLoad> payload(void) {
+            return std::make_shared<PayLoad>(chave, conteudo);
+        }
     };
 
 struct RetornoBusca {
-    std::shared_ptr<Node> *p = nullptr, *q = nullptr; //, *o = nullptr;
+    NodePtr p = nullptr, q = nullptr;
     bool achou=false;
     std::shared_ptr<PayLoad> payload;
 };
 
 
-typedef std::shared_ptr<Node> *NodePtr;
 
 
 class Patricia {
-    public:
-        static unsigned int contador;
-    private:
-
+private:
     std::shared_ptr<Node> raiz;    
     void InsereAux(NodePtr node_superior, NodePtr node_inferior, NodePtr node_novo);
-
+    void BuscaAuxiliar(const std::string&, NodePtr, std::shared_ptr<RetornoBusca>);
+    unsigned int AchaNivel (const std::string&, const std::string&);
+    bool ComecaCom (const std::string&, const std::string&);
+    void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>);
+    char AchaChar(const std::string &, unsigned int);
 public:
+    static unsigned int contador;
         void Insere(const PayLoad &);
         void Insere(const std::string&, const std::string&);
-        void Lista(void);
-        void ListaAux(std::shared_ptr<Node>, unsigned int );
         std::shared_ptr<RetornoBusca> Busca(const std::string&);
-        void BuscaAuxiliar(const std::string&, std::shared_ptr<Node>*, std::shared_ptr<RetornoBusca>);
-        unsigned int AchaNivel (const std::string&, const std::string&);
-        bool ComecaCom (const std::string&, const std::string&);
         std::string GeraDot(void);
         bool Remove(const std::string&);
-        void GeraDotAux(std::stringstream&, std::stringstream&, std::shared_ptr<Node>);
-        char AchaChar(const std::string &, unsigned int);
         void Limpa(void);
 };
 

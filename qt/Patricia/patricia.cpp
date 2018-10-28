@@ -30,8 +30,8 @@ void Patricia::InsereAux(NodePtr node_superior, NodePtr node_inferior, NodePtr n
     auto node_interno = std::make_shared<NodeInterno>();
 
     /* Salva as chaves */
-    const std::string chave_novo = node_novo->get()->Chave();
-    const std::string chave_inferior = node_inferior->get()->Chave();
+    const std::string chave_novo = node_novo->get()->chave;
+    const std::string chave_inferior = node_inferior->get()->chave;
 
     /* Acha o nivel que as strings divergem e o caractere de cada uma */
     auto nivel = AchaNivel(chave_inferior, chave_novo);
@@ -40,7 +40,7 @@ void Patricia::InsereAux(NodePtr node_superior, NodePtr node_inferior, NodePtr n
 
     /* Preparamos o no interno, com o nivel e as duas folhas */
     node_interno->nivel = nivel;
-    node_interno->prefixo = std::string(chave_novo, 0, nivel);
+    node_interno->chave = std::string(chave_novo, 0, nivel);
     node_interno->ponteiros[p_novo - 'a'] = (*node_novo);
     node_interno->ponteiros[p_inferior - 'a'] = (*node_inferior);
 
@@ -112,11 +112,11 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
     if (!no) return;
     if (no->isFolha()) {
         NodeFolha* tmp = (NodeFolha*) no.get();
-        definicoes << "no" << tmp->id << " [shape=ellipse, label=\"" << tmp->payload->chave << "\"];" << std::endl;
+        definicoes << "no" << tmp->id << " [shape=ellipse, label=\"" << tmp->chave << "\"];" << std::endl;
     }
     if (no->isInterno()) {
         NodeInterno* tmp = (NodeInterno*) no.get();
-        definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->prefixo <<  "| {";
+        definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->chave <<  "| {";
         bool virgula = false;
         for (char i='a'; i <= '{'; i++) {
             if (tmp->ponteiros[i-'a']) {
@@ -137,42 +137,6 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
     }
 }
 
-/* Lista a arvore */
-void Patricia::Lista(void) {
-    if (raiz.get() == nullptr) {
-        std::cout << "Arvore vazia!" << std::endl;
-        return;
-    }
-    std::cout << "Raiz:" << std::endl;
-    raiz->print();
-    if (raiz->isFolha()) {
-        return;
-    }
-    unsigned int identacao = 0;
-    std::cout << "Arvore contem nos internos!" << std::endl;
-    Patricia::ListaAux(raiz, identacao);
-    return;
-}
-
-/* Funcao recursiva para listar a arvore */
-void Patricia::ListaAux(std::shared_ptr<Node> no, unsigned int identacao) {
-    std::string itmp(" ", identacao);
-    if (no.get() == nullptr) {
-        std::cout << itmp << "-> NULL" << std::endl;
-        return;
-    }
-    no->print(identacao);
-    if (no->isInterno()) {
-        auto tmp = std::static_pointer_cast<NodeInterno>(no);
-        for (char i='a'; i <= '{'; i++) {
-            if (tmp->ponteiros[i-'a']) {
-                std::cout << itmp << "-> " << i << std::endl;
-                ListaAux(tmp->ponteiros[i-'a'], identacao+2);
-            }
-        }
-    }
-    return;
-}
 
 /* Remove a chave da árvore */
 bool Patricia::Remove (const std::string& chave) {
@@ -235,9 +199,9 @@ void Patricia::BuscaAuxiliar(const std::string& chave, NodePtr no, std::shared_p
      if (no->get()->isFolha()) {
        auto tmp = std::static_pointer_cast<NodeFolha>(*no);
        /* Se a chave do nó for a procurada */
-       if (tmp->payload->chave == chave) {
+       if (tmp->chave == chave) {
            /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
-            r->payload = tmp->payload;
+            r->payload = tmp->payload();
             r->achou = true;
             return;
         }
@@ -249,7 +213,7 @@ void Patricia::BuscaAuxiliar(const std::string& chave, NodePtr no, std::shared_p
     if (no->get()->isInterno()) {
         auto tmp = std::static_pointer_cast<NodeInterno>(*no);
         /* Se o prefixo do nó for diferente da chave podemos retornar */
-        if (!ComecaCom(chave, tmp->prefixo)) {
+        if (!ComecaCom(chave, tmp->chave)) {
             return;
         }
         /* Caso contrário vamos procurar o ramo a seguir */
@@ -259,11 +223,6 @@ void Patricia::BuscaAuxiliar(const std::string& chave, NodePtr no, std::shared_p
         BuscaAuxiliar(chave, no2, r);
         return;
     }
-    return;
-}
-
-void NodeFolha::Lista(void) {
-    print();
     return;
 }
 
@@ -297,18 +256,10 @@ bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
     return false;
 }
 
-Node::Node() {
+Node::Node() : Node(NODE) {};
+
+Node::Node(int t) : tipo(t) {
     this->id = Patricia::contador++;
-}
-
-void NodeFolha::print(unsigned int identacao) {
-    std::string itmp(" ", identacao);
-    std::cout << itmp <<  "==> NodeFolha ID=" << id << " Chave=" << payload->chave << std::endl;
-}
-
-void NodeInterno::print(unsigned int identacao) {
-    std::string itmp(" ", identacao);
-    std::cout << itmp << "==> NodeInterno ID=" << id << " Prefixo=" << prefixo << std::endl;
 }
 
 unsigned int NodeInterno::NumFilhos(void) {
