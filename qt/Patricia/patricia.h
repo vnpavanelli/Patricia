@@ -60,6 +60,7 @@ struct RetornoBusca {
     std::shared_ptr<PayLoad> payload;
 };
 
+typedef RetornoBusca *BuscaPtr;
 
 class Patricia {
 private:
@@ -69,7 +70,7 @@ private:
     static bool ComecaCom (const std::string&, const std::string&);
     static char AchaChar(const std::string &, unsigned int);
 
-    static void BuscaAuxiliar(const std::string&, const NodePtr*, std::shared_ptr<RetornoBusca>);
+    static void BuscaAuxiliar(const std::string&, const NodePtr*, RetornoBusca*);
     void GeraDotAux(std::stringstream&, std::stringstream&, NodePtr) const;
 
     static void InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo);
@@ -78,7 +79,7 @@ public:
     static unsigned int contador;
         void Insere(const PayLoad &);
         void Insere(const std::string&, const std::string&);
-        std::shared_ptr<RetornoBusca> Busca(const std::string&) const;
+        RetornoBusca Busca(const std::string&) const;
         std::string GeraDot(void) const;
         bool Remove(const std::string&);
         void Limpa(void);

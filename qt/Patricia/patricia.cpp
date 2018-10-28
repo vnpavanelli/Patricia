@@ -77,18 +77,18 @@ void Patricia::Insere(const PayLoad &pay) {
     auto aux = Busca(pay.chave);
 
     /* Se achou termina */
-    if (aux->achou) {
+    if (aux.achou) {
         return;
     }
 
     /* Caso tenha chegado em um nó nulo, insira a chave neste nó */
-    if ((aux->q != nullptr) && (*(aux->q) == nullptr)) {
-        *(aux->q) = node_novo;
+    if ((aux.q != nullptr) && (*(aux.q) == nullptr)) {
+        *(aux.q) = node_novo;
         return;
     }
 
     /* Se não, prossiga criando um nó interno e inserindo ela neste nó */
-    InsereAux(aux->q, *(aux->q), node_novo);
+    InsereAux(aux.q, *(aux.q), node_novo);
     return;
 }
 
@@ -144,14 +144,15 @@ bool Patricia::Remove (const std::string& chave) {
     auto r = Busca(chave);
 
     /* Se não achou a chave termina */
-    if (!r->achou) return false;
+    if (!r.achou) return false;
 
     /* Remove o nó contendo a chave */
-    (*r->q) = nullptr;
+    delete *r.q;
+    (*r.q) = nullptr;
 
     /* Se existir um nó superior */
-    if (r->p && (*r->p)) {
-        auto tmp = (NodeInterno*) (*r->p);
+    if (r.p && (*r.p)) {
+        auto tmp = (NodeInterno*) (*r.p);
 //        auto tmp = std::static_pointer_cast<NodeInterno>(*r->p);
         /* Se este nó só conter um único filho */
         if (tmp->NumFilhos() <= 1) {
@@ -164,7 +165,8 @@ bool Patricia::Remove (const std::string& chave) {
             }
             /* E se encontrar o filho, substitua o link do nó pelo filho, eliminando o nó interno */
             if (nodeptr) {
-                (*r->p) = nodeptr;
+                delete *r.p;
+                (*r.p) = nodeptr;
             }
         }
     }
@@ -172,20 +174,20 @@ bool Patricia::Remove (const std::string& chave) {
 }
 
 /* Faz a busca por uma chave na árvore */
-std::shared_ptr<RetornoBusca> Patricia::Busca(const std::string& chave) const {
+RetornoBusca Patricia::Busca(const std::string& chave) const {
     /* Cria o objeto de retorno da busca */
-    auto r = std::make_shared<RetornoBusca>();
+    RetornoBusca r;
     /* Se não existir uma raiz, a busca é falsa */
     if (!raiz) {
         return r;
     }
     /* Faz a busca recursiva a partir da raiz */
-    BuscaAuxiliar(chave, &raiz, r);
+    BuscaAuxiliar(chave, &raiz, &r);
     return r;
 }
 
 /* Função recursiva para a Busca */
-void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, std::shared_ptr<RetornoBusca> r) {
+void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, RetornoBusca* r) {
     /* Move os ponteiros p e q */
      r->p = r->q;
      if (no != nullptr) {
