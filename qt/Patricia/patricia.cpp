@@ -26,8 +26,6 @@ char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
  * Linka o node_superior para o nó interno
  */
 void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo) {
-    /* Cria o nó interno */
-    auto node_interno = new NodeInterno();
 
     /* Salva as chaves */
     const std::string& chave_novo = node_novo->chave;
@@ -38,9 +36,12 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
     const char p_novo = AchaChar(chave_novo, nivel);
     const char p_inferior = AchaChar(chave_inferior, nivel);
 
+    /* Cria o nó interno */
+    auto node_interno = new NodeInterno(std::string(chave_novo, 0, nivel), nivel);
+
     /* Preparamos o no interno, com o nivel e as duas folhas */
-    node_interno->nivel = nivel;
-    node_interno->chave = std::string(chave_novo, 0, nivel);
+//    node_interno->nivel = nivel;
+//    node_interno->chave = std::string(chave_novo, 0, nivel);
     node_interno->ponteiros[Traducao::Direta[p_novo]] = node_novo;
     node_interno->ponteiros[Traducao::Direta[p_inferior]] = node_inferior;
 

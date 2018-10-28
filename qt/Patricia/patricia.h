@@ -60,10 +60,9 @@ const char Reversa[] = {
 
 class PayLoad {
     public:
-//        std::string chave;
         std::string conteudo;
-        PayLoad(/*const std::string& ch,*/ const std::string& co) : /*chave(ch),*/ conteudo(co) { };
-        PayLoad(void) : /*chave(""),*/ conteudo("") {};
+        PayLoad(const std::string& co) : conteudo(co) { };
+        PayLoad(void) : conteudo("") {};
 };
 
     class Node {
@@ -74,7 +73,6 @@ class PayLoad {
             unsigned int id;
             uint8_t tipo;
             std::string chave;
-//            Node(uint8_t t = TIPO::NODE);
             Node(uint8_t t = TIPO::NODE, const std::string &c="");
     };
 
@@ -86,14 +84,13 @@ typedef Node *NodePtr;
         unsigned int NumFilhos(void) const;
         unsigned int nivel;
         NodePtr ponteiros[NUMARY] = {};
-//        std::shared_ptr<Node> ponteiros[NUMARY];
         NodeInterno() : Node(TIPO::INTERNO) {};
+        NodeInterno(const std::string &c, int n) : Node(TIPO::INTERNO, c), nivel(n) {};
     };
 
     class NodeFolha : public Node {
         private:
             PayLoad _payload;
-//            std::string conteudo;
         public:
         NodeFolha(const std::string& c, const PayLoad& p) : Node(TIPO::FOLHA, c), _payload(p) {};
         std::shared_ptr<PayLoad> payload(void) const {
