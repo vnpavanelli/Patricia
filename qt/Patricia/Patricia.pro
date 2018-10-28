@@ -28,15 +28,20 @@ SOURCES += \
         mainwindow.cpp \
     patricia.cpp \
     dialog_about.cpp \
-    mostradot.cpp
+    mostradot.cpp \
+    benchmark.cpp \
+    memory.cpp
 
 HEADERS += \
         mainwindow.h \
     patricia.h \
     dialog_about.h \
-    mostradot.h
+    mostradot.h \
+    benchmark.h \
+    memory.h
 
 FORMS += \
         mainwindow.ui \
     dialog_about.ui \
-    mostradot.ui
+    mostradot.ui \
+    benchmark.ui

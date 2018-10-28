@@ -98,3 +98,9 @@ void MainWindow::on_b_dot_clicked()
     dialog_dot->preencheDot(dot);
     dialog_dot->show();
 }
+
+void MainWindow::on_actionIniciar_triggered()
+{
+    dialog_benchmark = new BenchMark();
+    dialog_benchmark->show();
+}

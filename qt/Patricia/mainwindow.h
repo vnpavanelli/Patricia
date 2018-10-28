@@ -5,6 +5,7 @@
 #include <patricia.h>
 #include <dialog_about.h>
 #include <mostradot.h>
+#include <benchmark.h>
 namespace Ui {
 class MainWindow;
 }
@@ -32,11 +33,14 @@ private slots:
 
     void on_b_dot_clicked();
 
+    void on_actionIniciar_triggered();
+
 private:
     Ui::MainWindow *ui;
     Patricia p;
     Dialog_About *dialog_about;
     MostraDot *dialog_dot;
+    BenchMark *dialog_benchmark;
     QString dot;
 };
 

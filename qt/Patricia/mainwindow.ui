@@ -258,7 +258,14 @@
     <addaction name="actionCarregar_chaves"/>
     <addaction name="actionSobre"/>
    </widget>
+   <widget class="QMenu" name="menuBenchMark">
+    <property name="title">
+     <string>BenchMark</string>
+    </property>
+    <addaction name="actionIniciar"/>
+   </widget>
    <addaction name="menuArquivo"/>
+   <addaction name="menuBenchMark"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -277,6 +284,11 @@
   <action name="actionCarregar_chaves">
    <property name="text">
     <string>Carregar chaves</string>
+   </property>
+  </action>
+  <action name="actionIniciar">
+   <property name="text">
+    <string>Iniciar</string>
    </property>
   </action>
  </widget>
