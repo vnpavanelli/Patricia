@@ -7,6 +7,7 @@
 #include <map>
 
 #define NUMARY 27
+//#define DEBUG 1
 
 //enum TIPO {NODE=0, INTERNO=1, FOLHA=2};
 enum  TIPO: uint8_t {NODE=0, INTERNO=1, FOLHA=2};
@@ -88,6 +89,7 @@ typedef Node *NodePtr;
         NodePtr ponteiros[NUMARY] = {};
         NodeInterno() : Node(TIPO::INTERNO) {};
         NodeInterno(const std::string &c, int n) : Node(TIPO::INTERNO, c), nivel(n) {};
+        ~NodeInterno();
     };
 
     class NodeFolha : public Node {
@@ -95,10 +97,12 @@ typedef Node *NodePtr;
             PayLoad _payload;
         public:
         NodeFolha(const std::string& c, const PayLoad& p) : Node(TIPO::FOLHA, c), _payload(p) {};
+        ~NodeFolha();
         std::shared_ptr<PayLoad> payload(void) const {
             return std::make_shared<PayLoad>(_payload);
         }
     };
+
 
 struct RetornoBusca {
     NodePtr *p = nullptr, *q = nullptr;
@@ -123,7 +127,10 @@ private:
     void LimpaInterno (NodePtr);
 public:
     static unsigned int contador;
-//    static std::map<unsigned int, NodePtr> mapa;
+    static void Delete(NodePtr*);
+#ifdef DEBUG
+    static std::map<unsigned int, NodePtr> mapa;
+#endif
     void Insere(const std::string &s) {
         Insere(s,s);
     }

@@ -4,9 +4,12 @@
 #include <memory>
 #include <cstring>
 
+
 /* Contador para o ID de cada nó */
 unsigned int Patricia::contador = 0;
-//std::map<unsigned int, NodePtr> Patricia::mapa;
+#ifdef DEBUG
+std::map<unsigned int, NodePtr> Patricia::mapa;
+#endif
 
 /* Insere deve receber um PayLoad, se receber duas strings, converter e chamar a função correta */
 void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
@@ -53,13 +56,13 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
 
 /* Insere o PayLoad na árvore */
 void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
-    /* Cria um nó novo contendo o payload */
-    auto node_novo = new NodeFolha(chave, pay);
 //    Patricia::mapa[node_novo->id] = (NodePtr) node_novo;
 //    auto node_novo = std::static_pointer_cast<Node>(std::make_shared<NodeFolha>(pay));
 
     /* Se a raiz é nula podemos inserir uma folha nela e termina */
     if (raiz == nullptr) {
+        /* Cria um nó novo contendo o payload */
+        auto node_novo = new NodeFolha(chave, pay);
         raiz = node_novo;
         return;
     }
@@ -67,12 +70,16 @@ void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
     /* Se a raiz é uma simples folha, inserimos um no interno dividindo entra a folha e no que vamos criar */
     if (raiz->isFolha()) {
         if (raiz->Chave() == chave) return;
+        /* Cria um nó novo contendo o payload */
+        auto node_novo = new NodeFolha(chave, pay);
         InsereAux(&raiz, raiz, node_novo);
         return;
     }
 
     /* Se a raiz é um no interno precisamos checar se ele contem o prefixo da chave */
     if (raiz->isInterno() && !ComecaCom(chave, raiz->Chave())) {
+        /* Cria um nó novo contendo o payload */
+        auto node_novo = new NodeFolha(chave, pay);
         InsereAux(&raiz, raiz, node_novo);
         return;
     }
@@ -82,18 +89,20 @@ void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
 
     /* Se achou termina */
     if (aux.achou) {
-//        Patricia::mapa.erase(node_novo->id);
-        delete node_novo;
         return;
     }
 
     /* Caso tenha chegado em um nó nulo, insira a chave neste nó */
     if ((aux.q != nullptr) && (*(aux.q) == nullptr)) {
+        /* Cria um nó novo contendo o payload */
+        auto node_novo = new NodeFolha(chave, pay);
         *(aux.q) = node_novo;
         return;
     }
 
     /* Se não, prossiga criando um nó interno e inserindo ela neste nó */
+    /* Cria um nó novo contendo o payload */
+    auto node_novo = new NodeFolha(chave, pay);
     InsereAux(aux.q, *(aux.q), node_novo);
     return;
 }
@@ -156,29 +165,23 @@ bool Patricia::Remove (const std::string& chave) {
     if (!r.achou) return false;
 
     /* Remove o nó contendo a chave */
-//    Patricia::mapa.erase((*r.q)->id);
-    delete *r.q;
-    (*r.q) = nullptr;
+    Patricia::Delete(r.q);
 
     /* Se existir um nó superior */
     if (r.p && (*r.p)) {
         auto tmp = (NodeInterno*) (*r.p);
-//        auto tmp = std::static_pointer_cast<NodeInterno>(*r->p);
         /* Se este nó só conter um único filho */
-        if (tmp->NumFilhos() <= 1) {
-            /* Procure este filho */
-            NodePtr nodeptr = nullptr;
-            for (int i=0; i<NUMARY;i++) {
-                if (tmp->ponteiros[i]) {
-                    nodeptr = tmp->ponteiros[i];
-                }
+        int nfilhos = 0;
+        NodePtr nodeptr = nullptr;
+        for (int i=0; i<NUMARY && nfilhos < 2;i++) {
+            if (tmp->ponteiros[i]) {
+                nfilhos++;
+                nodeptr = tmp->ponteiros[i];
             }
-            /* E se encontrar o filho, substitua o link do nó pelo filho, eliminando o nó interno */
-            if (nodeptr) {
-//                Patricia::mapa.erase((*r.p)->id);
-                delete *r.p;
-                (*r.p) = nodeptr;
-            }
+        }
+        /* Se encontrar o filho, substitua o link do nó pelo filho, eliminando o nó interno */
+        if (nfilhos == 1 && nodeptr) {
+            Patricia::Delete(r.p);
         }
     }
     return true;
@@ -201,32 +204,22 @@ RetornoBusca Patricia::Busca(const std::string& chave) const {
 void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, RetornoBusca* r) {
     /* Move os ponteiros p e q */
      r->p = r->q;
-     if (no != nullptr) {
-         r->q = const_cast<NodePtr*>(no);
-         if (*no == nullptr) return;
-     } else {
-         r->q = nullptr;
-         return;
-     }
+     r->q = const_cast<NodePtr*>(no);
 
-     /* Se o nó for folha */
-     if ((*no)->isFolha()) {
-         auto tmp = (NodeFolha*) *no;
-       /* Se a chave do nó for a procurada */
-       if (tmp->chave == chave) {
-           /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
-            r->payload = tmp->payload();
-            r->achou = true;
-            return;
-        }
-       /* Podemos retornar pois chegamos a uma folha */
-        return;
-    }
+     if (no == nullptr || *no == nullptr) return;
 
     /* Se o nó for interno */
     if ((*no)->isInterno()) {
         auto tmp = (NodeInterno*) *no;
         /* Se o prefixo do nó for diferente da chave podemos retornar */
+        /*
+        const char *p0, *p1;
+        p0 = chave.c_str();
+        p1 = tmp->chave.c_str();
+        while (*p0 == *p1 && *p1 != '\0') { ++p0; ++p1; };
+        if (*p1 != '\0') return;
+        */
+
         if (!ComecaCom(chave, tmp->chave)) {
             return;
         }
@@ -237,6 +230,20 @@ void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, Retorn
         BuscaAuxiliar(chave, no2, r);
         return;
     }
+
+    /* Se o nó for folha */
+    if ((*no)->isFolha()) {
+        auto tmp = (NodeFolha*) *no;
+      /* Se a chave do nó for a procurada */
+      if (tmp->chave == chave) {
+          /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
+           r->payload = tmp->payload();
+           r->achou = true;
+           return;
+       }
+      /* Podemos retornar pois chegamos a uma folha */
+       return;
+   }
     return;
 }
 
@@ -268,11 +275,17 @@ bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
 
 Node::Node(uint8_t t, const std::string &c) : tipo(t), chave(c) {
     this->id = ++Patricia::contador;
-//    std::cout << "Criando nó " << this->id << " Chave=" << c <<  std::endl;
+#ifdef DEBUG
+    std::cout << "Criando nó " << this->id << " Chave=" << chave << " Tipo=" << (int) tipo << std::endl;
+    Patricia::mapa[this->id] = this;
+#endif
 }
 
 Node::~Node() {
-//    std::cout << "Removendo nó " << this->id << std::endl;
+#ifdef DEBUG
+    std::cout << "Removendo nó " << this->id << " chave=" << this->chave << " tipo=" << (int) tipo <<  std::endl;
+    Patricia::mapa.erase(this->id);
+#endif
 }
 
 unsigned int NodeInterno::NumFilhos(void) const {
@@ -283,21 +296,48 @@ unsigned int NodeInterno::NumFilhos(void) const {
     return r;
 }
 
+NodeInterno::~NodeInterno()
+{
+#ifdef DEBUG
+    std::cout << "Removendo nó interno id=" << this->id << " prefixo=" << this->chave << std::endl;
+#endif
+    for (int i=0; i<NUMARY; i++) {
+//        if (ponteiros[i]) {
+            Patricia::Delete(&ponteiros[i]);
+//        }
+    }
+}
+
 void Patricia::Limpa(void) {
-    LimpaInterno(raiz);
+    Patricia::Delete(&raiz);
     raiz=nullptr;
 }
 
 void Patricia::LimpaInterno(NodePtr no) {
     if (no==nullptr) return;
-//    std::cout << "LimpaInterno id=" << no->id << " chave=" << no->chave << std::endl;
     if (no->isInterno()) {
         auto tmp = (NodeInterno*) no;
         for (int i=0; i<NUMARY; i++) {
             LimpaInterno(tmp->ponteiros[i]);
         }
     }
-//    Patricia::mapa.erase(no->id);
     delete no;
     return;
+}
+
+void Patricia::Delete(NodePtr *no)
+{
+    if (no==nullptr || *no==nullptr) return;
+    if ((*no)->isInterno()) delete (NodeInterno*) *no;
+    else if ((*no)->isFolha()) delete (NodeFolha*) *no;
+     else delete *no;
+    *no = nullptr;
+    return;
+}
+
+NodeFolha::~NodeFolha()
+{
+#ifdef DEBUG
+    std::cout << "Removendo nó folha id=" << this->id << " chave=" << this->chave << std::endl;
+#endif
 }

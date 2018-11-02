@@ -6,8 +6,11 @@
 #include <string>
 #include <chrono>
 #include <vector>
+#include <unistd.h>
 
 using namespace std;
+
+const useconds_t espera = 0; //10e5;
 
 /* Checa uso de memoria pela Patricia */
 void patricia(FILE* in) {
@@ -84,14 +87,17 @@ void patricia_remove(FILE* in) {
 		vetor.push_back(buffer);
 	}
 	fseek(in, 0, SEEK_SET);
-	for (i=1000;i<vetor.size();i+=1000) {
+	for (i=10000;i<vetor.size();i+=10000) {
+		{
 		Patricia p;
 		for (int j=0;j<i;j++) p.Insere(vetor[j], vetor[j]);
 		auto start = std::chrono::system_clock::now();
-		for (int j=0;j<i;j++) p.Remove(vetor[j]);
+		for (int j=0;j<1000;j++) p.Remove(vetor[j]);
 		auto end = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = end-start;
 		cout << i << " " << elapsed.count() << endl;
+		}
+		usleep(espera);
 	}
 }
 
@@ -132,11 +138,11 @@ void stdmap_remove(FILE* in) {
 		vetor.push_back(buffer);
 	}
 	fseek(in, 0, SEEK_SET);
-	for (i=1000;i<vetor.size();i+=1000) {
+	for (i=10000;i<vetor.size();i+=10000) {
 		map<string,string> mapa;
 		for (int j=0;j<i;j++) mapa[vetor[j]] = vetor[j];
 		auto start = std::chrono::system_clock::now();
-		for (int j=0;j<i;j++) mapa.erase(vetor[j]);
+		for (int j=0;j<1000;j++) mapa.erase(vetor[j]);
 		auto end = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = end-start;
 		cout << i << " " << elapsed.count() << endl;
