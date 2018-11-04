@@ -22,8 +22,7 @@ void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
  * Trivial depois do uso das LookUp Tables de tradução
  */
 char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
-    const char r = in.c_str()[nivel];
-    return r;
+    return in.c_str()[nivel];
 }
 
 
@@ -86,7 +85,7 @@ void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
     }
 
     /* Procura pela chave na árvore */
-    auto aux = Busca(chave);
+    auto aux = Busca(chave, false);
 
     /* Se achou termina */
     if (aux.achou) {
@@ -189,7 +188,7 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
 /* Remove a chave da árvore */
 bool Patricia::Remove (const std::string& chave) {
     /* Realiza a busca */
-    auto r = Busca(chave);
+    auto r = Busca(chave, false);
 
     /* Se não achou a chave termina */
     if (!r.achou) return false;
@@ -235,7 +234,7 @@ bool Patricia::Remove (const std::string& chave) {
 }
 
 /* Faz a busca por uma chave na árvore */
-RetornoBusca Patricia::Busca(const std::string& chave) const {
+RetornoBusca Patricia::Busca(const std::string& chave, bool simples) const {
     /* Cria o objeto de retorno da busca */
     RetornoBusca r;
     /* Se não existir uma raiz, a busca é falsa */
@@ -243,7 +242,11 @@ RetornoBusca Patricia::Busca(const std::string& chave) const {
         return r;
     }
     /* Faz a busca recursiva a partir da raiz */
-    BuscaAuxiliar(chave, &raiz, &r);
+    if (simples) {
+        BuscaAuxiliarSimples(chave, &raiz, &r);
+    } else {
+        BuscaAuxiliar(chave, &raiz, &r);
+    }
     return r;
 }
 
@@ -431,3 +434,38 @@ NodeFolha::~NodeFolha()
     std::cout << "Removendo nó folha id=" << this->id << " chave=" << this->chave << std::endl;
 #endif
 }
+
+/* Função recursiva para a Busca */
+void Patricia::BuscaAuxiliarSimples(const std::string& chave, const NodePtr* no, RetornoBusca* r) const {
+    if (no == nullptr || *no == nullptr) return;
+
+    /* Se o nó for interno */
+    if ((*no)->isInterno()) {
+        auto tmp = (NodeInterno*) *no;
+        /* Vamos procurar o ramo a seguir */
+        char letra = AchaChar(chave, tmp->nivel);
+        NodePtr* no2 = &tmp->ponteiros[Traducao::Direta[(uint) letra]];
+
+        /* E chamar a busca recursiva a partir deste ramo */
+        BuscaAuxiliarSimples(chave, no2, r);
+        return;
+    }
+
+    /* Se o nó for folha */
+    if ((*no)->isFolha()) {
+        auto tmp = (NodeFolha*) *no;
+
+        /* Se a chave do nó for a procurada */
+        if (tmp->chave == chave) {
+            /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
+            r->payload = tmp->payload();
+            r->achou = true;
+            return;
+        }
+        /* Podemos retornar pois chegamos a uma folha */
+        return;
+    }
+    return;
+}
+
+

@@ -154,6 +154,7 @@ private:
     /* Função auxiliar para limpar a Árvore */
     void LimpaInterno (NodePtr);
 
+    void BuscaAuxiliarSimples(const std::string &chave, const NodePtr *no, RetornoBusca *r) const;
 public:
 
     /* Contador estatico com o ID do último nó gerado */
@@ -179,7 +180,7 @@ public:
     void Insere(const std::string&, const std::string&);
 
     /* Busca uma chave na árvore */
-    RetornoBusca Busca(const std::string&) const;
+    RetornoBusca Busca(const std::string&, bool simples=true) const;
 
     /* Gera o arquivo DOT da árvore */
     std::string GeraDot(void) const;
