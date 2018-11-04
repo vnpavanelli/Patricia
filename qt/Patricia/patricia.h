@@ -90,6 +90,7 @@ typedef Node *NodePtr;
         NodeInterno() : Node(TIPO::INTERNO) {};
         NodeInterno(const std::string &c, int n) : Node(TIPO::INTERNO, c), nivel(n) {};
         ~NodeInterno();
+        int Altura(void);
     };
 
     class NodeFolha : public Node {
@@ -101,6 +102,7 @@ typedef Node *NodePtr;
         std::shared_ptr<PayLoad> payload(void) const {
             return std::make_shared<PayLoad>(_payload);
         }
+        int Altura(void) { return 1; };
     };
 
 
@@ -140,6 +142,7 @@ public:
         std::string GeraDot(void) const;
         bool Remove(const std::string&);
         void Limpa(void);
+        int Altura(void);
         Patricia() : raiz(nullptr) {};
         ~Patricia() { Limpa(); };
 };

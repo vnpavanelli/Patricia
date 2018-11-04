@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1049</width>
-    <height>570</height>
+    <height>634</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -249,6 +249,32 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>510</y>
+         <width>67</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Altura:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="l_altura">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>510</y>
+         <width>67</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>

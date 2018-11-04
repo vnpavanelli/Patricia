@@ -308,9 +308,32 @@ NodeInterno::~NodeInterno()
     }
 }
 
+int NodeInterno::Altura()
+{
+    int altura=0;
+    for (int i=0; i<NUMARY; i++) {
+        if (ponteiros[i]) {
+            int tmp=0;
+            NodePtr const ptr = ponteiros[i];
+            if (ptr->isFolha()) tmp = ((NodeFolha*) (ptr))->Altura();
+            if (ptr->isInterno()) tmp = ((NodeInterno*) (ptr))->Altura();
+            altura = std::max(altura, tmp);
+        }
+    }
+    return ++altura;
+}
+
 void Patricia::Limpa(void) {
     Patricia::Delete(&raiz);
     raiz=nullptr;
+}
+
+int Patricia::Altura()
+{
+    if (raiz==nullptr) return 0;
+    if (raiz->isFolha()) return ((NodeFolha*) (raiz))->Altura();
+    if (raiz->isInterno()) return ((NodeInterno*) (raiz))->Altura();
+    return 0;
 }
 
 void Patricia::LimpaInterno(NodePtr no) {

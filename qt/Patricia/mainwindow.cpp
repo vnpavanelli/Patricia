@@ -9,6 +9,9 @@
 #include <QFileDialog>
 #include <fstream>
 #include <mostradot.h>
+#include <QMessageBox>
+#include <QTimer>
+#include <gerandodot.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -48,8 +51,18 @@ void MainWindow::on_b_mostrar_clicked()
     args << tmpfile.fileName() << "-Tpng" <<  "-o" << "tmp.png";
     QProcess processo;
     std::cout << "Iniciando processo" << std::endl;
+    auto mbox = new GerandoDot();
+    mbox->addText("Gerando imagem a partir do arquivo DOT");
+    mbox->show();
     processo.start("dot", args);
-    processo.waitForFinished();
+    int tempo=0;
+    QApplication::processEvents();
+    QApplication::processEvents();
+    while (!processo.waitForFinished(1000)) {
+        mbox->addText(QString("Gerando imagem a partir do DOT demorando, tempo: %1 s").arg(++tempo));
+        QApplication::processEvents();
+    }
+    mbox->close();
     std::cout << "Processo terminado" << std::endl;
     QGraphicsScene* scene = new QGraphicsScene;
     ui->graphicsView->setScene(scene);
@@ -57,6 +70,7 @@ void MainWindow::on_b_mostrar_clicked()
     QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
     scene->addItem(item);
     ui->graphicsView->show();
+    ui->l_altura->setText(QString::number(p.Altura()));
 }
 
 void MainWindow::on_actionSobre_triggered()
@@ -67,6 +81,7 @@ void MainWindow::on_actionSobre_triggered()
 
 void MainWindow::on_actionCarregar_chaves_triggered()
 {
+    {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open Text file"), "", tr("Text Files (*.txt *.dic)"));
     std::string arquivo = fileName.toStdString();
@@ -82,7 +97,8 @@ void MainWindow::on_actionCarregar_chaves_triggered()
 //        std::cout << "Inserindo: " << buffer << std::endl;
         p.Insere(buffer, prefixo+buffer);
     }
-    if (ui->b_automostra->isChecked()) on_b_mostrar_clicked();
+    }
+    if (ui->b_automostra->isChecked()) ui->b_mostrar->click();
     return;
 }
 
