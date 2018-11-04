@@ -7,6 +7,8 @@
 
 /* Contador para o ID de cada nó */
 unsigned int Patricia::contador = 0;
+
+/* Mapa para depuração */
 #ifdef DEBUG
 std::map<unsigned int, NodePtr> Patricia::mapa;
 #endif
@@ -17,7 +19,7 @@ void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
 }
 
 /* Função que acha o caractere no nível da string
- * Deve retornar '{' no caso do fim da string, para funcionar corretamente
+ * Trivial depois do uso das LookUp Tables de tradução
  */
 char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
     const char r = in.c_str()[nivel];
@@ -41,13 +43,13 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
     const char p_inferior = AchaChar(chave_inferior, nivel);
 
     /* Cria o nó interno */
+    /* std::string(chave_novo, 0, nivel) gera o prefixo deste nó */
+    /* nivel é o nível do nó */
     auto node_interno = new NodeInterno(std::string(chave_novo, 0, nivel), nivel);
 
     /* Preparamos o no interno, com o nivel e as duas folhas */
-//    node_interno->nivel = nivel;
-//    node_interno->chave = std::string(chave_novo, 0, nivel);
-    node_interno->ponteiros[Traducao::Direta[(uint) p_novo]] = node_novo;
-    node_interno->ponteiros[Traducao::Direta[(uint) p_inferior]] = node_inferior;
+    node_interno->ponteiros[ Traducao::Direta[(uint) p_novo] ] = node_novo;
+    node_interno->ponteiros[ Traducao::Direta[(uint) p_inferior] ] = node_inferior;
 
     /* Apontamos o nó superior para o novo nó interno */
     (*node_superior) = node_interno;
@@ -56,10 +58,8 @@ void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr 
 
 /* Insere o PayLoad na árvore */
 void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
-//    Patricia::mapa[node_novo->id] = (NodePtr) node_novo;
-//    auto node_novo = std::static_pointer_cast<Node>(std::make_shared<NodeFolha>(pay));
 
-    /* Se a raiz é nula podemos inserir uma folha nela e termina */
+    /* Se a raiz é nula podemos inserir uma folha nela e terminar */
     if (raiz == nullptr) {
         /* Cria um nó novo contendo o payload */
         auto node_novo = new NodeFolha(chave, pay);
@@ -78,8 +78,9 @@ void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
 
     /* Se a raiz é um no interno precisamos checar se ele contem o prefixo da chave */
     if (raiz->isInterno() && !ComecaCom(chave, raiz->Chave())) {
-        /* Cria um nó novo contendo o payload */
+        /* Se não tiver o prefixo da chave, criamos um nó novo contendo o payload */
         auto node_novo = new NodeFolha(chave, pay);
+        /* E inserimos um nó interno entre a raiz, o nó original que ela apontava e este novo */
         InsereAux(&raiz, raiz, node_novo);
         return;
     }
@@ -100,8 +101,7 @@ void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
         return;
     }
 
-    /* Se não, prossiga criando um nó interno e inserindo ela neste nó */
-    /* Cria um nó novo contendo o payload */
+    /* Se não, prossiga criando um nó interno e inserindo a chave neste nó */
     auto node_novo = new NodeFolha(chave, pay);
     InsereAux(aux.q, *(aux.q), node_novo);
     return;
@@ -109,44 +109,74 @@ void Patricia::Insere(const std::string& chave, const PayLoad &pay) {
 
 /* Gera um arquivo DOT para a árvore */
 std::string Patricia::GeraDot(void) const {
+    /* definicoes contem a parte de definicoes de nodes do DOT
+     * ligacoes contem a parte das ligacoes entre os nodes do DOT */
     std::stringstream definicoes, ligacoes;
+
+    /* Gera todas as definicoes e ligacoes recursivamente a partir da raiz */
     GeraDotAux(definicoes, ligacoes, raiz);
 
+    /* Vamos montar o arquivo DOT em tmp */
     std::stringstream tmp;
+
+    /* Inicia o digraph com o tipo de nó padrão como "record" */
     tmp << "digraph Teste {" << std::endl << " node [shape=record];" << std::endl;
+
+    /* Cria uma raiz com um circulo duplo */
     tmp << "raiz [shape=doublecircle,label=\"RAIZ\"];" << std::endl;
+
+    /* Insere as definicoes */
     tmp << definicoes.str();
+
+    /* Gera a ligação da raiz para o primeiro nó */
     if (raiz) tmp << "raiz->no" << raiz->id << ";" << std::endl;
+
+    /* Insere as ligacoes */
     tmp << ligacoes.str();
+
+    /* Termina o DOT */
     tmp << "}" << std::endl;
+
     return tmp.str();
 }
 
 /* Funcao recursiva para gerar o DOT */
 void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& ligacoes, NodePtr no) const {
+    /* Se o nó é nulo não precisa fazer nada */
     if (no == nullptr) return;
+
+    /* Se o nó é folha, insira a definicao dele apenas */
     if (no->isFolha()) {
         NodeFolha* tmp = (NodeFolha*) no;
         definicoes << "no" << tmp->id << " [shape=ellipse, label=\"" << tmp->chave << "\"];" << std::endl;
         return;
     }
+
+    /* Se o nó é interno é preciso também inserir as ligacoes */
     if (no->isInterno()) {
         NodeInterno* tmp = (NodeInterno*) no;
+        /* Definicao do nó */
         definicoes << "no" << tmp->id << " [label=\"{<f0> " << tmp->nivel << "| <f1> " << tmp->chave <<  "| {";
-        bool virgula = false;
 
+        /* Para cada filho do nó interno vamos inserir o quadrado dele na definicao e sua ligacao */
+        bool virgula = false;
         for (int i=0; i < NUMARY; i++) {
+            /* Se o filho existe */
             if (tmp->ponteiros[i]) {
+                /* Precisamos inserir uma | somente apos o primeiro item */
                 if (virgula) definicoes << " | ";
                  else virgula = true;
+
+                /* Definicoes no nó interno e ligacoes do nó interno com o filho */
                 definicoes << "<f" << Traducao::Reversa2[i] << "> " << Traducao::Reversa[i];
                 ligacoes << "no" << tmp->id << ":f" << Traducao::Reversa2[i] << " -> no" << tmp->ponteiros[i]->id << (tmp->ponteiros[i]->isFolha() ? "" : ":f0") << ";" << std::endl;
-
             }
         }
 
+        /* Terminamos a definicao do nó interno */
         definicoes << "}}\"];" << std::endl;
 
+        /* E vamos chamar a função recursiva para cada filho válido */
         for (int i=0; i < NUMARY; i++) {
             if (tmp->ponteiros[i])
                 GeraDotAux(definicoes, ligacoes, tmp->ponteiros[i]);
@@ -167,21 +197,31 @@ bool Patricia::Remove (const std::string& chave) {
     /* Remove o nó contendo a chave */
     Patricia::Delete(r.q);
 
-    /* Se existir um nó superior */
+    /* Se existir um nó superior, vamos verificar se ele contem somente um filho
+     * Se isso for verdade, podemos remover este nó e ligar direto o nó acima dele com o filho dele,
+     * eliminando o nó superior ao removido inicialmente */
+
+    /* O nó P existe e é válido? */
     if (r.p && (*r.p)) {
+        /* Transforma o ponteiro em Nó Interno */
         auto tmp = (NodeInterno*) (*r.p);
-        /* Se este nó só conter um único filho */
         int nfilhos = 0;
-        NodePtr nodeptr = nullptr;
+        NodePtr* nodeptr = nullptr;
+
+        /* Checa o número de filhos e salva o ponteiro para o filho encontrado */
         for (int i=0; i<NUMARY && nfilhos < 2;i++) {
             if (tmp->ponteiros[i]) {
                 nfilhos++;
-                nodeptr = tmp->ponteiros[i];
+                nodeptr = &tmp->ponteiros[i];
             }
         }
+
         /* Se encontrar o filho, substitua o link do nó pelo filho, eliminando o nó interno */
-        if (nfilhos == 1 && nodeptr) {
+        if (nfilhos == 1 && nodeptr && (*nodeptr) != nullptr) {
+            NodePtr tmp = (*nodeptr);
+            (*nodeptr) = nullptr;
             Patricia::Delete(r.p);
+            *(r.p) = tmp;
         }
     }
     return true;
