@@ -165,7 +165,7 @@ void Patricia::GeraDotAux(std::stringstream& definicoes, std::stringstream& liga
             if (tmp->ponteiros[i]) {
                 /* Precisamos inserir uma | somente apos o primeiro item */
                 if (virgula) definicoes << " | ";
-                 else virgula = true;
+                else virgula = true;
 
                 /* Definicoes no nó interno e ligacoes do nó interno com o filho */
                 definicoes << "<f" << Traducao::Reversa2[i] << "> " << Traducao::Reversa[i];
@@ -218,9 +218,16 @@ bool Patricia::Remove (const std::string& chave) {
 
         /* Se encontrar o filho, substitua o link do nó pelo filho, eliminando o nó interno */
         if (nfilhos == 1 && nodeptr && (*nodeptr) != nullptr) {
+            /* Salvamos em tmp o nó filho */
             NodePtr tmp = (*nodeptr);
+
+            /* Marcamos ele como nulo para não ser apagado junto do nó P */
             (*nodeptr) = nullptr;
+
+            /* Apagamos para onde P aponta */
             Patricia::Delete(r.p);
+
+            /* Ligamos o nó P ao filho salvo */
             *(r.p) = tmp;
         }
     }
@@ -243,29 +250,24 @@ RetornoBusca Patricia::Busca(const std::string& chave) const {
 /* Função recursiva para a Busca */
 void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, RetornoBusca* r) {
     /* Move os ponteiros p e q */
-     r->p = r->q;
-     r->q = const_cast<NodePtr*>(no);
+    r->p = r->q;
+    r->q = const_cast<NodePtr*>(no);
 
-     if (no == nullptr || *no == nullptr) return;
+    if (no == nullptr || *no == nullptr) return;
 
     /* Se o nó for interno */
     if ((*no)->isInterno()) {
         auto tmp = (NodeInterno*) *no;
-        /* Se o prefixo do nó for diferente da chave podemos retornar */
-        /*
-        const char *p0, *p1;
-        p0 = chave.c_str();
-        p1 = tmp->chave.c_str();
-        while (*p0 == *p1 && *p1 != '\0') { ++p0; ++p1; };
-        if (*p1 != '\0') return;
-        */
 
+        /* Se o prefixo do nó for diferente da chave podemos retornar */
         if (!ComecaCom(chave, tmp->chave)) {
             return;
         }
+
         /* Caso contrário vamos procurar o ramo a seguir */
         char letra = AchaChar(chave, tmp->nivel);
         NodePtr* no2 = &tmp->ponteiros[Traducao::Direta[(uint) letra]];
+
         /* E chamar a busca recursiva a partir deste ramo */
         BuscaAuxiliar(chave, no2, r);
         return;
@@ -274,16 +276,17 @@ void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, Retorn
     /* Se o nó for folha */
     if ((*no)->isFolha()) {
         auto tmp = (NodeFolha*) *no;
-      /* Se a chave do nó for a procurada */
-      if (tmp->chave == chave) {
-          /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
-           r->payload = tmp->payload();
-           r->achou = true;
-           return;
-       }
-      /* Podemos retornar pois chegamos a uma folha */
-       return;
-   }
+
+        /* Se a chave do nó for a procurada */
+        if (tmp->chave == chave) {
+            /* colocamos o conteudo no objeto de retorno e marcamos a busca verdadeira */
+            r->payload = tmp->payload();
+            r->achou = true;
+            return;
+        }
+        /* Podemos retornar pois chegamos a uma folha */
+        return;
+    }
     return;
 }
 
@@ -308,11 +311,15 @@ bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
     /* p1 aponta pro começo de s1 e p2 pro começo de pre */
     const char *p1 = s1.c_str(), *p2 = pre.c_str();
     return (memcmp(p1, p2, pre.size())==0);
+
+    /* memcmp é mais eficiente que a busca por ponteiros como abaixo: */
     /* Enquanto não chegarem ao fim das strings e forem iguais incremente */
-//    for (; *p1 != '\0' && *p2 != '\0'; ++p1, ++p2) if (*p1 != *p2) return false;
-//    return (*p2 == '\0');
+    //    for (; *p1 != '\0' && *p2 != '\0'; ++p1, ++p2) if (*p1 != *p2) return false;
+    //    return (*p2 == '\0');
 }
 
+/* Construtor do Nó básico
+ * Incremente o contador da árvore Patricia e usa dele como o ID do nó */
 Node::Node(uint8_t t, const std::string &c) : tipo(t), chave(c) {
     this->id = ++Patricia::contador;
 #ifdef DEBUG
@@ -321,6 +328,7 @@ Node::Node(uint8_t t, const std::string &c) : tipo(t), chave(c) {
 #endif
 }
 
+
 Node::~Node() {
 #ifdef DEBUG
     std::cout << "Removendo nó " << this->id << " chave=" << this->chave << " tipo=" << (int) tipo <<  std::endl;
@@ -328,6 +336,7 @@ Node::~Node() {
 #endif
 }
 
+/* Calcula o número de filhos de um nó interno */
 unsigned int NodeInterno::NumFilhos(void) const {
     unsigned int r = 0;
     for (int i=0; i<NUMARY; i++) {
@@ -336,38 +345,53 @@ unsigned int NodeInterno::NumFilhos(void) const {
     return r;
 }
 
+/* Destruidos do Nó Interno */
 NodeInterno::~NodeInterno()
 {
 #ifdef DEBUG
     std::cout << "Removendo nó interno id=" << this->id << " prefixo=" << this->chave << std::endl;
 #endif
+
+    /* Para cada filho do nó, delete ele recursivamente */
     for (int i=0; i<NUMARY; i++) {
-//        if (ponteiros[i]) {
-            Patricia::Delete(&ponteiros[i]);
-//        }
+        Patricia::Delete(&ponteiros[i]);
     }
 }
 
+/* Calcula a altura de um nó interno */
 int NodeInterno::Altura()
 {
+    /* A altura começa com 0 */
     int altura=0;
+
+    /* Para cada filho dele */
     for (int i=0; i<NUMARY; i++) {
         if (ponteiros[i]) {
             int tmp=0;
             NodePtr const ptr = ponteiros[i];
+
+            /* Pegue a altura do filho e coloque em tmp */
             if (ptr->isFolha()) tmp = ((NodeFolha*) (ptr))->Altura();
             if (ptr->isInterno()) tmp = ((NodeInterno*) (ptr))->Altura();
+
+            /* A altura é o valor máximo entre a atual e a altura do filho */
             altura = std::max(altura, tmp);
         }
     }
+
+    /* Incremente a altura do maior filho e retorne */
     return ++altura;
 }
 
+/* Limpa a árvore */
 void Patricia::Limpa(void) {
+    /* Como o destruidor do nó Interno é recursivo podemos apagar a raiz simplesmente */
     Patricia::Delete(&raiz);
     raiz=nullptr;
 }
 
+
+/* Calcula a altura da árvore patricia */
 int Patricia::Altura()
 {
     if (raiz==nullptr) return 0;
@@ -376,6 +400,7 @@ int Patricia::Altura()
     return 0;
 }
 
+/* Não usada mais */
 void Patricia::LimpaInterno(NodePtr no) {
     if (no==nullptr) return;
     if (no->isInterno()) {
@@ -388,12 +413,14 @@ void Patricia::LimpaInterno(NodePtr no) {
     return;
 }
 
+
+/* Deleta um nó, verificando o tipo dele e qual destruidor deve ser usado */
 void Patricia::Delete(NodePtr *no)
 {
     if (no==nullptr || *no==nullptr) return;
     if ((*no)->isInterno()) delete (NodeInterno*) *no;
     else if ((*no)->isFolha()) delete (NodeFolha*) *no;
-     else delete *no;
+    else delete *no;
     *no = nullptr;
     return;
 }
