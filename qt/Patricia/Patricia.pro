@@ -30,7 +30,8 @@ SOURCES += \
     dialog_about.cpp \
     mostradot.cpp \
     benchmark.cpp \
-    memory.cpp
+    memory.cpp \
+    resultadobusca.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,10 +39,12 @@ HEADERS += \
     dialog_about.h \
     mostradot.h \
     benchmark.h \
-    memory.h
+    memory.h \
+    resultadobusca.h
 
 FORMS += \
         mainwindow.ui \
     dialog_about.ui \
     mostradot.ui \
-    benchmark.ui
+    benchmark.ui \
+    resultadobusca.ui

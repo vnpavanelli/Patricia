@@ -6,6 +6,8 @@
 #include <dialog_about.h>
 #include <mostradot.h>
 #include <benchmark.h>
+#include <resultadobusca.h>
+
 namespace Ui {
 class MainWindow;
 }
@@ -35,6 +37,8 @@ private slots:
 
     void on_actionIniciar_triggered();
 
+    void on_b_buscar_clicked();
+
 private:
     Ui::MainWindow *ui;
     Patricia p;
@@ -42,6 +46,7 @@ private:
     MostraDot *dialog_dot;
     BenchMark *dialog_benchmark;
     QString dot;
+    ResultadoBusca* resultado_busca;
 };
 
 #endif // MAINWINDOW_H

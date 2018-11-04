@@ -187,9 +187,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>370</y>
-         <width>118</width>
-         <height>3</height>
+         <y>350</y>
+         <width>151</width>
+         <height>16</height>
         </rect>
        </property>
        <property name="orientation">
@@ -199,8 +199,8 @@
       <widget class="QPushButton" name="b_mostrar">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>410</y>
+         <x>30</x>
+         <y>400</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -212,8 +212,8 @@
       <widget class="QPushButton" name="pushButton">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>450</y>
+         <x>30</x>
+         <y>460</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -225,14 +225,30 @@
       <widget class="QPushButton" name="b_dot">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>380</y>
+         <x>30</x>
+         <y>370</y>
          <width>89</width>
          <height>25</height>
         </rect>
        </property>
        <property name="text">
         <string>Ver DOT</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="b_automostra">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>430</y>
+         <width>92</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Auto</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>

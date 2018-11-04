@@ -25,13 +25,13 @@ MainWindow::~MainWindow()
 void MainWindow::on_b_remover_clicked()
 {
     p.Remove(ui->r_chave->text().toStdString());
-    on_b_mostrar_clicked();
+    if (ui->b_automostra->isChecked()) on_b_mostrar_clicked();
 }
 
 void MainWindow::on_b_inserir_clicked()
 {
     p.Insere(ui->i_chave->text().toStdString(), ui->i_conteudo->text().toStdString());
-    on_b_mostrar_clicked();
+    if (ui->b_automostra->isChecked()) on_b_mostrar_clicked();
 }
 
 void MainWindow::on_b_mostrar_clicked()
@@ -82,14 +82,14 @@ void MainWindow::on_actionCarregar_chaves_triggered()
 //        std::cout << "Inserindo: " << buffer << std::endl;
         p.Insere(buffer, prefixo+buffer);
     }
-    on_b_mostrar_clicked();
+    if (ui->b_automostra->isChecked()) on_b_mostrar_clicked();
     return;
 }
 
 void MainWindow::on_pushButton_clicked()
 {
     p.Limpa();
-    on_b_mostrar_clicked();
+    if (ui->b_automostra->isChecked()) on_b_mostrar_clicked();
 }
 
 void MainWindow::on_b_dot_clicked()
@@ -103,4 +103,13 @@ void MainWindow::on_actionIniciar_triggered()
 {
     dialog_benchmark = new BenchMark();
     dialog_benchmark->show();
+}
+
+void MainWindow::on_b_buscar_clicked()
+{
+    resultado_busca = new ResultadoBusca();
+    const QString chave = ui->b_chave->text();
+    auto r = p.Busca(chave.toStdString());
+    resultado_busca->Mostra(r, chave);
+    resultado_busca->show();
 }
