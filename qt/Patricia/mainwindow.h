@@ -39,6 +39,8 @@ private slots:
 
     void on_b_buscar_clicked();
 
+    void on_actionSair_triggered();
+
 private:
     Ui::MainWindow *ui;
     Patricia p;

@@ -21,7 +21,7 @@ void Patricia::Insere(const std::string &chave, const std::string &conteudo) {
 /* Função que acha o caractere no nível da string
  * Trivial depois do uso das LookUp Tables de tradução
  */
-char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
+inline char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
     return in.c_str()[nivel];
 }
 
@@ -30,7 +30,7 @@ char Patricia::AchaChar(const std::string &in, unsigned int nivel) {
  * Cria um novo nó interno, inserindo o node_inferior e o node_novo nele.
  * Linka o node_superior para o nó interno
  */
-void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo) {
+inline void Patricia::InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo) {
 
     /* Salva as chaves */
     const std::string& chave_novo = node_novo->chave;
@@ -294,7 +294,7 @@ void Patricia::BuscaAuxiliar(const std::string& chave, const NodePtr* no, Retorn
 }
 
 /* Encontra o nível em que as duas strings divergem */
-unsigned int Patricia::AchaNivel (const std::string& k1, const std::string& k2) {
+inline unsigned int Patricia::AchaNivel (const std::string& k1, const std::string& k2) {
     /* p0 e p1 aponta pro começo da chave 1
      * p2 aponta pro começo da chave 2 */
     const char *p0 = k1.c_str();
@@ -310,7 +310,7 @@ unsigned int Patricia::AchaNivel (const std::string& k1, const std::string& k2) 
 }
 
 /* Checa se a string s1 começa com o prefixo pre */
-bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
+inline bool Patricia::ComecaCom (const std::string& s1, const std::string& pre) {
     /* p1 aponta pro começo de s1 e p2 pro começo de pre */
     const char *p1 = s1.c_str(), *p2 = pre.c_str();
     return (memcmp(p1, p2, pre.size())==0);
@@ -340,7 +340,7 @@ Node::~Node() {
 }
 
 /* Calcula o número de filhos de um nó interno */
-unsigned int NodeInterno::NumFilhos(void) const {
+inline unsigned int NodeInterno::NumFilhos(void) const {
     unsigned int r = 0;
     for (int i=0; i<NUMARY; i++) {
         if (ponteiros[i]) r++;
@@ -418,7 +418,7 @@ void Patricia::LimpaInterno(NodePtr no) {
 
 
 /* Deleta um nó, verificando o tipo dele e qual destruidor deve ser usado */
-void Patricia::Delete(NodePtr *no)
+inline void Patricia::Delete(NodePtr *no)
 {
     if (no==nullptr || *no==nullptr) return;
     if ((*no)->isInterno()) delete (NodeInterno*) *no;

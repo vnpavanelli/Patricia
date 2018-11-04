@@ -76,9 +76,9 @@ public:
 /* Nó básico */
 class Node {
 public:
-    bool isInterno(void) const { return tipo == TIPO::INTERNO; };
-    bool isFolha(void) const { return tipo == TIPO::FOLHA; };
-    const std::string Chave(void) const { return chave; };
+    inline bool isInterno(void) const { return tipo == TIPO::INTERNO; };
+    inline bool isFolha(void) const { return tipo == TIPO::FOLHA; };
+    inline const std::string Chave(void) const { return chave; };
     unsigned int id;
     uint8_t tipo;
     std::string chave; // chave da folha ou prefixo do nó interno
@@ -93,7 +93,7 @@ typedef Node *NodePtr;
 /* Nó Interno, contendo ponteiros para outros nós */
 class NodeInterno : public Node {
 public:
-    unsigned int NumFilhos(void) const;
+    inline unsigned int NumFilhos(void) const;
     unsigned int nivel;
     NodePtr ponteiros[NUMARY] = {}; // Inicializa os ponteiros em nullptr
     NodeInterno() : Node(TIPO::INTERNO) {};
@@ -112,7 +112,7 @@ public:
     std::shared_ptr<PayLoad> payload(void) const {
         return std::make_shared<PayLoad>(_payload);
     }
-    int Altura(void) { return 1; };
+    inline int Altura(void) { return 1; };
 };
 
 /* Estrutura retornada pela Busca */
@@ -134,13 +134,13 @@ private:
     NodePtr raiz;
 
     /* Recebe duas Strings e acha o nível que elas divergem */
-    static unsigned int AchaNivel (const std::string&, const std::string&);
+    inline static unsigned int AchaNivel (const std::string&, const std::string&);
 
     /* Verifica se a 1a string começa com a 2a string */
-    static bool ComecaCom (const std::string&, const std::string&);
+    inline static bool ComecaCom (const std::string&, const std::string&);
 
     /* Retorna a letra no nivel da string */
-    static char AchaChar(const std::string &, unsigned int);
+    inline static char AchaChar(const std::string &, unsigned int);
 
     /* Função auxiliar recursiva da Busca */
     static void BuscaAuxiliar(const std::string&, const NodePtr*, RetornoBusca*);
@@ -149,7 +149,7 @@ private:
     void GeraDotAux(std::stringstream&, std::stringstream&, NodePtr) const;
 
     /* Função auxiliar para Inserir um nó */
-    static void InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo);
+    inline static void InsereAux(NodePtr *node_superior, NodePtr node_inferior, NodePtr node_novo);
 
     /* Função auxiliar para limpar a Árvore */
     void LimpaInterno (NodePtr);
@@ -161,7 +161,7 @@ public:
     static unsigned int contador;
 
     /* Função auxiliar para deletar um nó */
-    static void Delete(NodePtr*);
+    inline static void Delete(NodePtr*);
 
 /* Mapa usado no DEBUG para verificar se houve vazamento de ponteiros (memory leaking) */
 #ifdef DEBUG

@@ -129,3 +129,8 @@ void MainWindow::on_b_buscar_clicked()
     resultado_busca->Mostra(r, chave);
     resultado_busca->show();
 }
+
+void MainWindow::on_actionSair_triggered()
+{
+    close();
+}

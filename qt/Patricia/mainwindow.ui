@@ -299,6 +299,7 @@
     </property>
     <addaction name="actionCarregar_chaves"/>
     <addaction name="actionSobre"/>
+    <addaction name="actionSair"/>
    </widget>
    <widget class="QMenu" name="menuBenchMark">
     <property name="title">
@@ -331,6 +332,11 @@
   <action name="actionIniciar">
    <property name="text">
     <string>Iniciar</string>
+   </property>
+  </action>
+  <action name="actionSair">
+   <property name="text">
+    <string>Sair</string>
    </property>
   </action>
  </widget>
